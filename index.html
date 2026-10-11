@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCore — Tu salud, simple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- GLOBAL NAVIGATION (Calendly 64px Sticky Top Bar) -->
+<header class="gnav">
+  <nav class="gnav-inner" aria-label="Principal">
+    <a class="brand" href="#" data-go="home">
+      <img src="assets/mol.png" alt="MediCore" width="28" height="28">
+      <span>MediCore</span>
+    </a>
+    <div class="links">
+      <button data-go="home" class="on">Inicio</button>
+      <button data-go="meds">Medicamentos</button>
+      <button data-go="cuida">Cuídate</button>
+      <button data-go="mal">Me siento mal</button>
+      <button data-go="botiquin">Botiquín <span class="badge-pill">Nuevo</span></button>
+      <button data-go="prep">Prepárate</button>
+    </div>
+    <div class="gnav-cta">
+      <button class="btn btn-primary btn-sm" data-go="mal">Evaluar síntomas</button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <!-- INICIO (HERO & FEATURE CARDS) -->
+  <section class="screen on" id="s-home">
+    <div class="hero-wrapper">
+      <div class="wrap">
+        <div class="hero-grid">
+          <!-- Left Column: Editorial Headline & Actions -->
+          <div class="hero-content">
+            <div class="kicker">
+              <span class="kicker-dot"></span>
+              MediCore · Conoce a Mol
+            </div>
+            <h1>Tu salud,<br>simple.</h1>
+            <p class="lead">Medicamentos, IMC y orientación de síntomas en un solo lugar, con Mol a tu lado para guiarte en cada paso.</p>
+            <div class="cta">
+              <button class="btn btn-primary" data-go="mal">Evaluar síntomas</button>
+              <button class="btn btn-outline" data-go="meds">Ver medicamentos</button>
+            </div>
+            <div class="hero-highlights">
+              <div class="hero-highlight-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Orientación médica preventiva inmediata</span>
+              </div>
+              <div class="hero-highlight-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Más de 50 medicamentos detallados con posología y advertencias</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Elevated Product Card with Atmosphere Blobs -->
+          <div class="hero-showcase">
+            <div class="blob blob-cyan"></div>
+            <div class="blob blob-magenta"></div>
+            <div class="product-card">
+              <div class="product-card-topbar">
+                <span class="product-status-pill">
+                  <span class="product-status-dot"></span> Asistente Activo
+                </span>
+                <span style="font-size: 13px; color: var(--color-slate-gray); font-weight: 500;">MediCore 2.0</span>
+              </div>
+              <img src="assets/mol.png" alt="Mol, la mascota de MediCore" class="hero-mol float">
+              <div class="callout">
+                <b>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  Mol dice
+                </b>
+                <span id="mol-msg">¡Hola! Estoy aquí para ayudarte con tu salud. ¿Cómo te sientes hoy?</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Strip Band -->
+    <div class="trust-strip">
+      <div class="wrap trust-inner">
+        <div class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Orientación clínica preventiva
+        </div>
+        <span class="trust-sep">•</span>
+        <div class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Catálogo con +50 medicamentos
+        </div>
+        <span class="trust-sep">•</span>
+        <div class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Cálculo de IMC al instante
+        </div>
+        <span class="trust-sep">•</span>
+        <div class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          100% Gratuito y confiable
+        </div>
+      </div>
+    </div>
+
+    <!-- Features 3-Card Band -->
+    <div class="band">
+      <div class="wrap">
+        <div class="section-header">
+          <span class="kicker"><span class="kicker-dot"></span> Módulos Principales</span>
+          <h2>Todo lo que necesitas para cuidarte</h2>
+          <p class="lead">Herramientas simples y directas diseñadas para darte tranquilidad y respuestas médicas confiables.</p>
+        </div>
+        <div class="grid3">
+          <button class="card feat" data-go="meds">
+            <div class="feat-icon-badge">💊</div>
+            <h3>Medicamentos</h3>
+            <p>Para qué sirven, dosis recomendadas, cuándo tomarlos y precauciones esenciales de seguridad.</p>
+            <span class="link">Explorar catálogo ›</span>
+          </button>
+          <button class="card feat" data-go="cuida">
+            <div class="feat-icon-badge">⚖️💧</div>
+            <h3>Cuídate (IMC y Agua)</h3>
+            <p>Calcula tu índice de masa corporal y tu ingesta diaria de agua personalizada según tu clima y actividad con Mol.</p>
+            <span class="link">Calcular IMC y Agua ›</span>
+          </button>
+          <button class="card feat" data-go="mal">
+            <div class="feat-icon-badge">🩺</div>
+            <h3>Me siento mal</h3>
+            <p>Selecciona tus síntomas para recibir orientación guiada, causas probables y pautas seguras.</p>
+            <span class="link">Evaluar mis síntomas ›</span>
+          </button>
+          <button class="card feat" data-go="botiquin">
+            <div class="feat-icon-badge">🎒</div>
+            <h3>Botiquín Esencial <span class="badge-pill" style="font-size: 11px;">Nuevo</span></h3>
+            <p>Guías para armar, organizar y revisar botiquines seguros según tu actividad con Mol Paramédico.</p>
+            <span class="link">Preparar mi botiquín ›</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEDICAMENTOS -->
+  <section class="screen" id="s-meds">
+    <div class="wrap">
+      <div class="section-header">
+        <span class="kicker"><span class="kicker-dot"></span> Catálogo Farmacéutico</span>
+        <h2>Medicamentos</h2>
+        <p class="lead">Consulta indicaciones, posología y precauciones clave. Toca cualquier medicamento para ver detalles completos.</p>
+      </div>
+
+      <div class="search-container">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input class="search" type="search" id="med-search" placeholder="Buscar medicamento por nombre o categoría..." aria-label="Buscar medicamento">
+        </div>
+      </div>
+
+      <div class="cat-filters" id="cat-filters">
+        <button class="cat-chip active" data-cat="all">Todos</button>
+        <button class="cat-chip" data-cat="Analgésico">💊 Analgésicos</button>
+        <button class="cat-chip" data-cat="Antihistamínico">🔵 Antihistamínicos</button>
+        <button class="cat-chip" data-cat="Antibiótico">🟣 Antibióticos</button>
+        <button class="cat-chip" data-cat="Gastroprotector">🟢 Gastroprotectores</button>
+        <button class="cat-chip" data-cat="Vitamina">💛 Vitaminas</button>
+        <button class="cat-chip" data-cat="Cardiovascular">❤️ Cardiovascular</button>
+        <button class="cat-chip" data-cat="Respiratorio">🫁 Respiratorios</button>
+        <button class="cat-chip" data-cat="Dermatológico">🔴 Dermatológicos</button>
+      </div>
+
+      <div class="med-grid" id="med-grid"></div>
+    </div>
+  </section>
+
+  <!-- CUÍDATE (IMC & HIDRATACIÓN PERSONALIZADA) -->
+  <section class="screen" id="s-cuida">
+    <div class="wrap">
+      <!-- Selector de Submódulo Cuídate (IMC vs Agua por Día) -->
+      <div class="cuida-nav-tabs">
+        <button class="cuida-tab-btn active" data-cuida-tab="imc">
+          <span>⚖️ Índice de Masa Corporal (IMC)</span>
+        </button>
+        <button class="cuida-tab-btn" data-cuida-tab="agua">
+          <span>💧 Agua por Día (Hidratación)</span>
+          <span class="badge-pill blue" style="font-size: 11px;">Nuevo</span>
+        </button>
+      </div>
+
+      <!-- PANEL 1: ÍNDICE DE MASA CORPORAL (IMC) -->
+      <div id="panel-cuida-imc">
+        <div class="section-header">
+          <span class="kicker"><span class="kicker-dot"></span> Nutrición y Salud</span>
+          <h2>Tu Índice de Masa Corporal</h2>
+          <p class="lead">Conoce tu estado nutricional en segundos y recibe recomendaciones preventivas adaptadas por Mol.</p>
+        </div>
+        <div class="two">
+          <div class="card form-card">
+            <h3 style="margin-bottom: 20px;">Ingresa tus datos</h3>
+            <div class="form">
+              <label>Edad (años)<input id="imc-edad" type="number" placeholder="ej. 24" min="1" max="120"></label>
+              <label>Peso (kg)<input id="imc-peso" type="number" placeholder="ej. 68" step="0.1" min="1"></label>
+              <label>Altura (cm)<input id="imc-altura" type="number" placeholder="ej. 172" min="30" max="250"></label>
+              <button class="btn btn-primary full" id="btn-imc">Calcular IMC</button>
+            </div>
+          </div>
+          <div class="showcase-container">
+            <div class="blob blob-cyan"></div>
+            <div id="imc-placeholder" class="card center">
+              <img src="assets/mol.png" alt="Mol" class="mol-sm float">
+              <h3 style="font-size: 20px; margin-bottom: 8px;">Mol está listo</h3>
+              <p style="color: var(--color-slate-gray); font-size: 15px;">Ingresa tu peso y altura en el formulario para obtener tu análisis de IMC en tiempo real.</p>
+            </div>
+            <div id="imc-result" hidden>
+              <div class="card center" id="imc-card">
+                <span class="product-status-pill" style="margin-bottom: 12px;">Resultado del Cálculo</span>
+                <div class="big" id="imc-val"></div>
+                <div class="state" id="imc-label"></div>
+                <div class="scale"><i id="imc-marker"></i></div>
+                <div class="scale-l">
+                  <span>Bajo</span>
+                  <span>Normal</span>
+                  <span>Sobrepeso</span>
+                  <span>Obesidad</span>
+                </div>
+              </div>
+              <div class="mol-say" id="imc-mol"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: AGUA POR DÍA (HIDRATACIÓN PERSONALIZADA) -->
+      <div id="panel-cuida-agua" hidden>
+        <div class="section-header">
+          <span class="kicker"><span class="kicker-dot"></span> Resolución 3803 de 2016 (RIEN) & IDEAM</span>
+          <h2>Agua por día: Tu hidratación inteligente</h2>
+          <p class="lead">
+            Calcula tu ingesta diaria de líquidos de referencia según tu edad, nivel de actividad física y el clima habitual de tu ciudad.
+          </p>
+        </div>
+
+        <!-- Aclaración Médica Institucional (Página 1 del documento) -->
+        <div class="distincion-medica-banner">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <div>
+            <strong>Distinción médica importante:</strong> No existe una fórmula universal que calcule con exactitud cuánta agua necesita cualquier persona. Las necesidades varían con la actividad física, la temperatura ambiental, la alimentación y las condiciones de salud.
+          </div>
+        </div>
+
+        <div class="two">
+          <!-- Formulario de Hidratación (Páginas 2 y 3) -->
+          <div class="card form-card">
+            <h3 style="margin-bottom: 6px;">Tus datos de hidratación</h3>
+            <p class="sub" style="margin-bottom: 20px;">Basado en las recomendaciones poblacionales del Ministerio de Salud</p>
+
+            <div class="form">
+              <label>
+                1. ¿Cuál es tu grupo de edad?
+                <select id="agua-edad">
+                  <option value="19-50" selected>19–50 años (Adulto)</option>
+                  <option value="51+">51 años o más (Adulto mayor)</option>
+                  <option value="14-18">14–18 años (Adolescente)</option>
+                  <option value="menor14">Menor de 14 años (Pediátrico)</option>
+                </select>
+              </label>
+
+              <label>
+                2. ¿Qué referencia fisiológica corresponde a tu caso?
+                <span style="font-size: 12px; color: var(--color-slate-gray); font-weight: normal; margin-top: -4px;">
+                  Se usa únicamente para seleccionar los valores poblacionales de la tabla colombiana.
+                </span>
+                <div class="radio-chip-group">
+                  <label class="radio-chip">
+                    <input type="radio" name="agua-sexo" value="m">
+                    <span>Masculina</span>
+                  </label>
+                  <label class="radio-chip">
+                    <input type="radio" name="agua-sexo" value="f" checked>
+                    <span>Femenina</span>
+                  </label>
+                </div>
+              </label>
+
+              <label>
+                3. ¿En qué ciudad vives habitualmente?
+                <span style="font-size: 12px; color: var(--color-slate-gray); font-weight: normal; margin-top: -4px;">
+                  Asociada a su normal climatológica oficial del IDEAM (1991–2020).
+                </span>
+                <select id="agua-ciudad"></select>
+              </label>
+
+              <label>
+                4. ¿Qué nivel de actividad tienes habitualmente?
+                <select id="agua-actividad">
+                  <option value="bajo">Bajo: principalmente sentado o caminatas cortas</option>
+                  <option value="moderado" selected>Moderado: caminatas frecuentes o ejercicio regular</option>
+                  <option value="alto">Alto: trabajo físico intenso o entrenamientos exigentes</option>
+                </select>
+              </label>
+
+              <label>
+                5. ¿Cuánto tiempo haces ejercicio en un día habitual?
+                <select id="agua-ejercicio">
+                  <option value="0">No hago ejercicio</option>
+                  <option value="<30">Menos de 30 minutos</option>
+                  <option value="30-60" selected>30 a 60 minutos</option>
+                  <option value=">60">Más de 60 minutos</option>
+                </select>
+              </label>
+
+              <label>
+                6. ¿Pasas tiempo al aire libre con calor intenso?
+                <select id="agua-calor">
+                  <option value="rara">Rara vez</option>
+                  <option value="algunas" selected>Algunas veces</option>
+                  <option value="frecuente">Frecuentemente</option>
+                </select>
+              </label>
+
+              <label>
+                7. ¿Hay alguna condición especial médica?
+                <select id="agua-condicion">
+                  <option value="ninguna" selected>Ninguna conocida</option>
+                  <option value="embarazo">Embarazo (19–50 años)</option>
+                  <option value="lactancia">Lactancia (19–50 años)</option>
+                  <option value="restriccion">Enfermedad renal, cardíaca o restricción de líquidos</option>
+                  <option value="otra">Otra condición médica relevante</option>
+                </select>
+              </label>
+
+              <label>
+                Peso corporal (kg) <span style="font-weight: normal; font-size: 12px; color: var(--color-slate-gray);">(Opcional para referencia)</span>
+                <input id="agua-peso" type="number" placeholder="ej. 65" min="20" max="250">
+              </label>
+
+              <button class="btn btn-primary full" id="btn-calc-agua">
+                Calcular mi Hidratación Diaria
+              </button>
+            </div>
+          </div>
+
+          <!-- Showcase de Resultados Diferenciados (Páginas 6 y 7) -->
+          <div class="showcase-container">
+            <div class="blob blob-cyan"></div>
+
+            <!-- Placeholder Inicial con Mol con su vaso de agua -->
+            <div id="agua-placeholder" class="card center">
+              <img src="assets/mol-toma-agua.png" alt="Mol bebiendo agua fresca" class="mol-md float">
+              <h3 style="font-size: 20px; margin-bottom: 8px;">Mol te acompaña a hidratarte</h3>
+              <p style="color: var(--color-slate-gray); font-size: 15px; max-width: 380px; margin: 0 auto;">
+                Completa tus datos en el formulario para obtener tu objetivo de líquidos en litros y vasos, junto con la influencia del clima de tu ciudad.
+              </p>
+            </div>
+
+            <!-- Panel de Resultados Diferenciados -->
+            <div id="agua-result" hidden>
+              <!-- Resultado 1: Referencia Diaria de Líquidos -->
+              <div class="agua-result-display-card">
+                <span class="product-status-pill" style="margin-bottom: 8px;">Objetivo de Bebidas Diarias</span>
+                <div class="agua-big-val" id="agua-val-litros">2,2 L</div>
+                <div class="agua-vasos-state" id="agua-val-vasos">≈ 9 vasos al día</div>
+                <div style="font-size: 13px; font-weight: 600; color: var(--color-slate-gray);" id="agua-grupo-label">
+                  Referencia RIEN: Mujeres, 19 años o más
+                </div>
+
+                <div class="agua-breakdown-box" id="agua-total-desc">
+                  <strong>Agua total diaria:</strong> 2,7 L. El cuerpo obtiene aproximadamente el 80% (2,2 L) mediante bebidas directas y el 20% restante de los alimentos.
+                </div>
+              </div>
+
+              <!-- Alerta de Restricción Médica Prioritaria (si aplica) -->
+              <div class="alerta-restriccion-card" id="agua-box-restriccion" hidden>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div>
+                  <h4>Atención: Restricción médica indicada</h4>
+                  <p>Si padeces enfermedad renal, insuficiencia cardíaca o tienes restricción estricta de líquidos prescrita por tu médico, <strong>esa necesidad individual debe prevalecer</strong>. No aumentes tu ingesta automáticamente por calor o ejercicio sin consultar a tu especialista.</p>
+                </div>
+              </div>
+
+              <!-- Resultado 2: Contexto Climático (IDEAM) y Actividad -->
+              <div class="agua-contexto-card" id="agua-contexto-card"></div>
+
+              <!-- Mol dice sobre hidratación -->
+              <div class="mol-say" style="margin-bottom: 24px;">
+                <img src="assets/mol_toma_agua.png" alt="Mol" id="agua-mol-avatar" class="float">
+                <div>
+                  <b>Mol dice</b>
+                  <p id="agua-mol-say">¡Bebe agua a pequeños sorbos a lo largo del día!</p>
+                </div>
+              </div>
+
+              <!-- Resultado 3: Rastreador Interactivo de Vasos del Día -->
+              <div class="vasos-tracker-card">
+                <div class="tracker-header">
+                  <div>
+                    <h4>Rastreador de Vasos de Hoy (250 ml)</h4>
+                    <span style="font-size: 13px; color: var(--color-slate-gray);">Toca cada vaso a medida que lo tomes</span>
+                  </div>
+                  <button class="btn btn-outline btn-sm" id="btn-reset-vasos" style="padding: 4px 10px; font-size: 12px;">
+                    Reiniciar
+                  </button>
+                </div>
+
+                <div class="vasos-grid" id="agua-vasos-tracker"></div>
+
+                <div class="tracker-footer">
+                  <strong style="color: var(--color-signal-blue);" id="agua-vasos-log-count">0 vasos tomados</strong>
+                  <span id="agua-vasos-feedback" style="font-size: 12.5px;"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN EDUCATIVA VISIBLE: ¿Por qué beber agua es necesario y beneficioso? (Páginas 4 y 5) -->
+        <div class="agua-edu-section">
+          <div class="section-header" style="text-align: left; margin-bottom: 28px;">
+            <span class="kicker"><span class="kicker-dot"></span> Fisiología y Beneficios</span>
+            <h2>¿Por qué beber agua es necesario y beneficioso?</h2>
+            <p class="lead" style="text-align: left; margin: 0;">
+              Funciones vitales descritas por MedlinePlus (Biblioteca Nacional de Medicina de EE. UU.) y el impacto en tu bienestar diario.
+            </p>
+          </div>
+
+          <!-- Grid de las 6 Funciones del Agua ilustradas con los nuevos assets -->
+          <div class="agua-funciones-grid" id="agua-funciones-grid"></div>
+
+          <!-- Señales de Deshidratación y Escala de Color de Orina (Página 5) -->
+          <div class="orina-section-card">
+            <div class="section-header" style="text-align: left; margin-bottom: 8px;">
+              <span class="kicker" style="background: #fffbeb; color: #b45309;"><span class="kicker-dot" style="background: #f59e0b;"></span> Autoevaluación Visual</span>
+              <h3>¿Qué puede ocurrir si no bebes suficiente agua?</h3>
+              <p class="sub" style="margin-top: 6px;">
+                Los primeros signos de alerta son <strong>sed, boca seca, cansancio, dolor de cabeza o mareos</strong>. Puedes evaluar tu nivel de hidratación observando el color de tu orina:
+              </p>
+            </div>
+
+            <!-- Escala Interactiva de Orina -->
+            <div class="orina-escala-container" id="agua-orina-escala"></div>
+
+            <!-- Alerta Urgencias (Página 5 del PDF) -->
+            <div class="emergency-alert-banner" style="margin-top: 24px; margin-bottom: 0;">
+              <div class="alert-banner-content">
+                <h4>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  Atención: Señales de Deshidratación Grave
+                </h4>
+                <p>
+                  La confusión mental, desorientación, ojos hundidos o pérdida de conciencia tras calor o esfuerzo extremo requieren <strong>atención médica urgente</strong>. No deben tratarse simplemente ofreciendo agua o sales por cuenta propia.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hábitos Sencillos que Recomienda MediCore (Página 5) -->
+          <div class="section-header" style="text-align: left; margin-bottom: 20px;">
+            <span class="kicker"><span class="kicker-dot"></span> Hábitos Diarios</span>
+            <h3>Pautas prácticas para mantenerte hidratado</h3>
+          </div>
+
+          <div class="habitos-grid">
+            <div class="habito-card">
+              <span class="habito-icon">🍶</span>
+              <div>
+                <h5>Botella reutilizable</h5>
+                <p>Lleva una botella de agua siempre contigo y bebe pequeños sorbos regulares a lo largo del día.</p>
+              </div>
+            </div>
+
+            <div class="habito-card">
+              <span class="habito-icon">🍽️</span>
+              <div>
+                <h5>Bebe con las comidas</h5>
+                <p>Acompaña tus comidas con agua y presta atención a los primeros avisos de sed antes de sentirte deshidratado.</p>
+              </div>
+            </div>
+
+            <div class="habito-card">
+              <span class="habito-icon">☀️</span>
+              <div>
+                <h5>Atención en calor y deporte</h5>
+                <p>Aumenta la frecuencia de ingesta si estás en ciudades calurosas o si realizas actividad física intensa.</p>
+              </div>
+            </div>
+
+            <div class="habito-card">
+              <span class="habito-icon">🚫</span>
+              <div>
+                <h5>Prioriza agua pura</h5>
+                <p>Prefiere agua natural, caldos e infusiones frente a gaseosas y bebidas ultraprocesadas con exceso de azúcar.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fuentes Oficiales de la Función de Hidratación (Página 6) -->
+          <div class="sources-card" style="margin-bottom: 0;">
+            <div class="section-header" style="text-align: left; margin-bottom: 8px;">
+              <span class="kicker"><span class="kicker-dot"></span> Documentación Oficial</span>
+              <h3 style="font-size: 20px;">Fuentes y Referencias de la Función de Hidratación</h3>
+            </div>
+
+            <div class="sources-grid">
+              <div class="source-item">
+                <h5>Minsalud Colombia — Resolución 3803 de 2016</h5>
+                <p>Recomendaciones de Ingesta de Energía y Nutrientes (RIEN) para la población colombiana.</p>
+                <a href="https://www.minsalud.gov.co/" target="_blank" rel="noopener noreferrer">Consultar Minsalud ↗</a>
+              </div>
+
+              <div class="source-item">
+                <h5>MedlinePlus — Agua en la dieta</h5>
+                <p>Biblioteca Nacional de Medicina de EE. UU.: funciones celulares, digestión y requerimientos.</p>
+                <a href="https://medlineplus.gov/spanish/ency/article/002471.htm" target="_blank" rel="noopener noreferrer">Consultar MedlinePlus ↗</a>
+              </div>
+
+              <div class="source-item">
+                <h5>IDEAM — Normales Climatológicas 1991–2020</h5>
+                <p>Referencia oficial de promedios de temperatura de ciudades y municipios de Colombia.</p>
+                <a href="http://www.ideam.gov.co/" target="_blank" rel="noopener noreferrer">Consultar IDEAM ↗</a>
+              </div>
+
+              <div class="source-item">
+                <h5>ICBF — Importancia de la Hidratación</h5>
+                <p>Guías alimentarias basadas en alimentos para la población colombiana.</p>
+                <a href="https://www.icbf.gov.co/" target="_blank" rel="noopener noreferrer">Consultar ICBF ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ME SIENTO MAL (SÍNTOMAS) -->
+  <section class="screen" id="s-mal">
+    <div class="wrap">
+      <div class="section-header">
+        <span class="kicker"><span class="kicker-dot"></span> Orientación de Síntomas</span>
+        <h2>Me siento mal</h2>
+        <p class="lead">Indica tus síntomas para recibir un análisis de orientación clínica y saber qué medidas preventivas tomar.</p>
+      </div>
+      <div class="two">
+        <div>
+          <div class="card" style="padding: 24px; margin-bottom: 20px;">
+            <p class="sub">Selecciona todos los síntomas que experimentas hoy</p>
+            <div class="sym-list" id="symptom-list"></div>
+            <button class="btn btn-primary full" id="btn-eval">Evaluar síntomas seleccionados</button>
+          </div>
+        </div>
+        <div class="showcase-container">
+          <div class="blob blob-magenta"></div>
+          <div class="card center" style="margin-bottom: 20px;">
+            <img src="assets/mol.png" alt="Mol" class="mol-sm float" id="mol-mal-img">
+            <p id="mol-mal-msg" style="color: var(--color-slate-gray); font-size: 15px; margin-top: 12px; font-weight: 500;">Dime tus síntomas, te ayudaremos a que te sientas mejor.</p>
+          </div>
+          <div id="result-panel"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREPÁRATE -->
+  <section class="screen" id="s-prep">
+    <div class="wrap center">
+      <div class="hero-showcase" style="margin-bottom: 20px;">
+        <div class="blob blob-cyan"></div>
+        <div class="blob blob-magenta"></div>
+        <img src="assets/mol-amarillo.png" alt="Mol en construcción" class="mol-md float" style="position: relative; z-index: 1;">
+      </div>
+      <span class="kicker"><span class="kicker-dot"></span> Próximamente</span>
+      <h2>Prepárate</h2>
+      <p class="lead narrow" style="margin: 0 auto 36px;">Herramientas preventivas, contingencias de salud y guías clínicas para mantenerte listo ante cualquier situación.</p>
+      <div class="prep-features narrow" style="margin: 0 auto;">
+        <div class="prep-card">
+          <div style="font-size: 24px; margin-bottom: 6px;">🌦️</div>
+          <h4>Alertas por Temporada</h4>
+          <p>Prevención de picos de gripe, polen estacional y olas de calor o frío (en desarrollo).</p>
+        </div>
+        <div class="prep-card" data-go="botiquin" style="cursor: pointer; border-color: var(--color-signal-blue); background: #f0f7ff;">
+          <div style="font-size: 24px; margin-bottom: 6px;">🎒</div>
+          <h4>Botiquín Esencial <span class="badge-pill blue" style="font-size: 10px;">¡Ya disponible!</span></h4>
+          <p>Guías para armar, organizar y revisar botiquines seguros según tu actividad con Mol Paramédico.</p>
+          <span class="link" style="font-size: 13px; font-weight: 700; color: var(--color-signal-blue); margin-top: 8px; display: inline-block;">Abrir módulo de botiquín →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTIQUÍN ESENCIAL -->
+  <section class="screen" id="s-botiquin">
+    <div class="wrap">
+      <!-- Showcase Hero de la Sección con Mol Paramédico y Botiquín 3D -->
+      <div class="hero-botiquin-showcase">
+        <div class="blob blob-cyan"></div>
+        <div class="blob blob-magenta"></div>
+
+        <div class="hero-botiquin-grid">
+          <div class="hero-botiquin-text">
+            <div class="kicker">
+              <span class="kicker-dot"></span>
+              MediCore · Botiquín Esencial
+            </div>
+            <h2>Guía para preparar, organizar y transportar botiquines seguros</h2>
+            <p class="lead">
+              Un botiquín debe adaptarse a tu entorno real, la duración de la actividad y las personas a tu cargo. Aprende qué llevar, cómo conservarlo y qué precauciones seguir con la supervisión de <strong>Mol Paramédico</strong>.
+            </p>
+
+            <div class="hero-botiquin-badges">
+              <span class="hero-meta-badge"><span class="dot"></span> MedlinePlus & Cruz Roja</span>
+              <span class="hero-meta-badge"><span class="dot"></span> CDC & Minsalud Colombia</span>
+              <span class="hero-meta-badge"><span class="dot"></span> 5 Kits por situación</span>
+              <span class="hero-meta-badge"><span class="dot"></span> Checklist interactivo</span>
+            </div>
+
+            <div class="hero-botiquin-actions">
+              <a href="#botiquin-tabs" class="btn btn-primary btn-sm">🎒 Armar mi botiquín</a>
+              <a href="#sec-emergencias" class="btn btn-outline btn-sm">🚨 Cuándo buscar ayuda</a>
+              <a href="#sec-revision" class="btn btn-outline btn-sm">📅 Revisión mensual</a>
+            </div>
+          </div>
+
+          <div class="hero-botiquin-visuals">
+            <img src="assets/mol_paramedico.png" alt="Mol Paramédico con chaleco de rescatista y estetoscopio" class="hero-mol-paramedico float">
+          </div>
+        </div>
+      </div>
+
+      <!-- Selector Dinámico de Situaciones / Contextos -->
+      <div class="botiquin-tabs-wrapper" id="botiquin-tabs-sec">
+        <div class="botiquin-tabs-header">
+          <div>
+            <span class="kicker" style="margin-bottom: 8px;"><span class="kicker-dot"></span> Situaciones y Contextos</span>
+            <h3 style="font-size: 22px;">Elige tu actividad para adaptar el kit</h3>
+          </div>
+          <span style="font-size: 13px; color: var(--color-slate-gray); font-weight: 500;">
+            Selecciona una pestaña para ver la recomendación específica
+          </span>
+        </div>
+
+        <div class="botiquin-tabs" id="botiquin-tabs"></div>
+      </div>
+
+      <!-- Banner de la Situación Activa con Consejo de Mol -->
+      <div class="kit-banner-card" id="kit-banner-card">
+        <div class="kit-banner-info">
+          <span class="kit-banner-subtitle" id="kit-active-sub">Para salir a la calle</span>
+          <h3 id="kit-active-title">Kit de Bolsillo</h3>
+          <p class="kit-banner-desc" id="kit-active-desc">
+            Ligero, discreto y compacto para imprevistos cotidianos, transporte público y paseos urbanos.
+          </p>
+          <div class="kit-comollevar-box" id="kit-active-comollevar">
+            <strong>Cómo llevarlo:</strong> Usar un estuche compacto, cerrado y fácil de encontrar dentro del bolso o mochila. Evitar dejar medicamentos sueltos en los bolsillos.
+          </div>
+        </div>
+
+        <div class="kit-mol-avatar-callout">
+          <img src="assets/mol_paramedico.png" alt="Mol Paramédico" class="float">
+          <b>Mol Paramédico dice</b>
+          <p id="kit-mol-speech">Para la calle: menos es más. Lo justo para curar un raspón y tener a mano tus contactos de emergencia.</p>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso y Verificación con Botiquín pegado a la esquina inferior izquierda -->
+      <div class="kit-progress-card" id="kit-progress-card">
+        <div class="kit-progress-corner-img-wrap">
+          <img src="assets/botiquin.png" alt="Botiquín de primeros auxilios" class="kit-corner-botiquin-img">
+        </div>
+
+        <div class="kit-progress-main-content">
+          <div class="progress-header">
+            <div class="progress-title-meta">
+              <h4 style="font-size: 18px; font-weight: 700; color: var(--color-ink-navy);">Verificación del Botiquín</h4>
+              <span class="progress-status-badge badge-mid" id="kit-progress-badge">📋 Cargando...</span>
+            </div>
+            <span style="font-size: 15px; font-weight: 700; color: var(--color-signal-blue);" id="kit-progress-count">0 de 0 listos</span>
+          </div>
+
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="kit-progress-bar"></div>
+          </div>
+
+          <div class="progress-footer">
+            <span id="kit-progress-mol-tip">Marca las casillas a medida que empaques cada elemento.</span>
+            <span style="font-size: 12px; color: var(--color-slate-gray);">💾 Se guarda automáticamente en este dispositivo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros, Búsqueda y Acciones Rápidas -->
+      <div class="botiquin-toolbar">
+        <div class="toolbar-filters">
+          <button class="filter-chip active" data-filter="all">Todos los elementos</button>
+          <button class="filter-chip" data-filter="pending">Pendientes / Faltantes</button>
+          <button class="filter-chip" data-filter="done">En botiquín</button>
+          <button class="filter-chip" data-filter="essential">Solo esenciales</button>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="search-mini-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="search" id="botiquin-item-search" placeholder="Filtrar por nombre o función..." aria-label="Filtrar elementos">
+          </div>
+
+          <button class="btn btn-outline btn-sm" id="btn-copy-missing" title="Copiar lista de faltantes para comprar en farmacia">
+            📋 Copiar faltantes
+          </button>
+          <button class="btn btn-outline btn-sm" id="btn-mark-all" title="Marcar todos los elementos de este kit">
+            ✓ Marcar todos
+          </button>
+          <button class="btn btn-outline btn-sm" id="btn-clear-all" title="Desmarcar todos los elementos">
+            ✕ Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid de Elementos del Checklist Interactivo -->
+      <div class="botiquin-checklist-grid" id="botiquin-checklist-grid"></div>
+
+      <!-- SECCIÓN: CUÁNDO BUSCAR AYUDA & PRECAUCIONES CRÍTICAS (Sección 6 del documento) -->
+      <div class="emergency-section" id="sec-emergencias">
+        <div class="emergency-alert-banner">
+          <div class="alert-banner-content">
+            <h4>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Emergencias Médicas: Cuándo no basta un botiquín
+            </h4>
+            <p>
+              El botiquín resuelve lesiones menores e inmediatas. Si identificas cualquiera de estos signos de alarma, solicita asistencia médica urgente sin demora. En Colombia, comunícate inmediatamente a la Línea 123.
+            </p>
+          </div>
+          <a href="tel:123" class="btn-emergency-call">
+            📞 Llamar al 123
+          </a>
+        </div>
+
+        <div class="section-header" style="text-align: left; margin-bottom: 24px;">
+          <h3 style="font-size: 22px;">4 Situaciones que requieren atención urgente</h3>
+          <p class="sub" style="margin-top: 4px;">Pautas claras basadas en el protocolo de la Cruz Roja y el Ministerio de Salud</p>
+        </div>
+
+        <div class="emergency-grid">
+          <div class="emergency-card">
+            <div class="emergency-card-top">
+              <span class="emergency-card-icon">🩸</span>
+              <h5>Sangrado Abundante</h5>
+            </div>
+            <p>
+              Si el sangrado no cede tras 5–10 minutos de presión directa continua con gasas estériles, o si brota en pulsos, mantén la presión sin retirar los apósitos empapados (coloca más encima) y traslada de urgencia.
+            </p>
+          </div>
+
+          <div class="emergency-card">
+            <div class="emergency-card-top">
+              <span class="emergency-card-icon">🫁</span>
+              <h5>Dificultad Respiratoria</h5>
+            </div>
+            <p>
+              Sensación de asfixia, labios o uñas azuladas, respiración ruidosa o hinchazón súbita en rostro o lengua (signos de reacción anafiláctica grave). Requiere atención médica inmediata.
+            </p>
+          </div>
+
+          <div class="emergency-card">
+            <div class="emergency-card-top">
+              <span class="emergency-card-icon">🧠</span>
+              <h5>Pérdida de Conciencia</h5>
+            </div>
+            <p>
+              Desmayos que no se recuperan en segundos, convulsiones, desorientación severa, traumatismos craneales fuertes o falta de respuesta al estímulo verbal. Proteger la cabeza y pedir ayuda.
+            </p>
+          </div>
+
+          <div class="emergency-card">
+            <div class="emergency-card-top">
+              <span class="emergency-card-icon">☀️</span>
+              <h5>Emergencias por Calor</h5>
+            </div>
+            <p>
+              Confusión, piel caliente y enrojecida sin sudor, desmayo o náuseas severas tras ejercicio o sol intenso. <strong>No basta con ofrecer agua o suero</strong>: puede tratarse de un golpe de calor potencialmente mortal.
+            </p>
+          </div>
+        </div>
+
+        <!-- Mitos y Aclaraciones Médicas Clave -->
+        <div class="myths-section-wrap">
+          <h4 style="font-size: 18px; margin-bottom: 16px; color: var(--color-ink-navy);">Aclaraciones Médicas y Prácticas Incorrectas</h4>
+          <div class="myths-grid">
+            <div class="myth-card">
+              <div class="myth-card-title">❌ ¿Alcohol o agua oxigenada dentro de heridas abiertas?</div>
+              <div class="myth-card-fact">
+                <strong>NO como regla universal:</strong> El alcohol y el agua oxigenada destruyen células sanas que participan en la cicatrización e irritan tejidos vivos. La recomendación médica institucional es lavar con <strong>solución salina estéril</strong> o agua potable limpia y jabón neutro suave.
+              </div>
+            </div>
+
+            <div class="myth-card">
+              <div class="myth-card-title">❌ ¿Antibióticos automedicados en el botiquín?</div>
+              <div class="myth-card-fact">
+                <strong>NO deben incluirse para uso libre:</strong> Los antibióticos, corticoides y medicamentos para dormir no deben tomarse de forma automática. Su prescripción debe ser individualizada por un médico para evitar resistencias bacterianas o efectos secundarios graves.
+              </div>
+            </div>
+
+            <div class="myth-card">
+              <div class="myth-card-title">❌ ¿Retirar objetos clavados profundamente?</div>
+              <div class="myth-card-fact">
+                <strong>NUNCA extraerlos en el campo:</strong> Las pinzas del botiquín son exclusivamente para astillas o espinas superficiales. Un objeto incrustado profundamente puede estar taponando una arteria; extraerlo puede provocar una hemorragia incontrolable. Inmovilízalo y traslada al paciente.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: ORGANIZACIÓN, CONSERVACIÓN Y RECORDATORIO MENSUAL (Sección 5 y 7) -->
+      <div class="revision-section" id="sec-revision">
+        <div>
+          <div class="section-header" style="text-align: left; margin-bottom: 24px;">
+            <span class="kicker"><span class="kicker-dot"></span> Buenas Prácticas</span>
+            <h3 style="font-size: 22px;">Organización y Conservación Segura</h3>
+            <p class="sub" style="margin-top: 4px;">6 Pilares institucionales para mantener tus suministros en óptimo estado</p>
+          </div>
+
+          <div class="pillars-grid">
+            <div class="pillar-card">
+              <span class="pillar-icon">🧰</span>
+              <h5>Estuche Adecuado</h5>
+              <p>Recipiente resistente, limpio, fácil de abrir y hermético contra polvo y humedad. En senderismo, preferir bolsas impermeables (dry-bags).</p>
+            </div>
+
+            <div class="pillar-card">
+              <span class="pillar-icon">🌡️</span>
+              <h5>Temperatura y Humedad</h5>
+              <p>Guardar según la etiqueta. La guantera de un auto al sol o un baño húmedo pueden alterar y degradar químicamente los medicamentos.</p>
+            </div>
+
+            <div class="pillar-card">
+              <span class="pillar-icon">📅</span>
+              <h5>Revisión Periódica</h5>
+              <p>Revisar mensualmente y antes de cada viaje o actividad importante. Reponer lo usado y retirar de inmediato elementos caducados.</p>
+            </div>
+
+            <div class="pillar-card">
+              <span class="pillar-icon">🏷️</span>
+              <h5>Inventario y Prospecto</h5>
+              <p>Conservar siempre los medicamentos en su envase o blíster original con lote, prospecto y fecha de caducidad visibles.</p>
+            </div>
+
+            <div class="pillar-card">
+              <span class="pillar-icon">🔒</span>
+              <h5>Prevención de Intoxicaciones</h5>
+              <p>En el hogar, mantener fuera del alcance y la vista de niños y mascotas, idealmente en lugar alto y bajo llave.</p>
+            </div>
+
+            <div class="pillar-card">
+              <span class="pillar-icon">📍</span>
+              <h5>Ubicación Conocida</h5>
+              <p>Informa a tus convivientes o compañeros de trabajo dónde está el botiquín y quiénes están capacitados para brindar apoyo.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget Interactivo de Revisión Mensual -->
+        <div class="revision-widget-card">
+          <div class="widget-header">
+            <div>
+              <h4 style="font-size: 18px; font-weight: 700; color: var(--color-ink-navy);">Semáforo de Revisión</h4>
+              <span style="font-size: 13px; color: var(--color-slate-gray);">Control mensual de existencias</span>
+            </div>
+            <span class="rev-status-pill status-ok" id="rev-traffic-status">🟢 Botiquín al día</span>
+          </div>
+
+          <div class="rev-input-row">
+            <label for="rev-last-date-input">Última revisión realizada:</label>
+            <input type="date" id="rev-last-date-input">
+            <button class="btn btn-outline btn-sm" id="btn-registrar-rev-hoy" title="Registrar que inspeccionaste el botiquín hoy">
+              Revisar hoy
+            </button>
+          </div>
+
+          <div class="rev-days-info" id="rev-days-calc">
+            Calculando días transcurridos...
+          </div>
+
+          <div class="rev-checklist-group">
+            <h5>Lista de inspección rápida:</h5>
+            <div id="rev-checklist-container"></div>
+          </div>
+
+          <div class="rev-mol-callout">
+            <img src="assets/mol_paramedico.png" alt="Mol Paramédico">
+            <p id="rev-mol-advice">
+              ¡Revisar el botiquín una vez al mes evita sorpresas desagradables cuando más lo necesitas!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: FUENTES MÉDICAS E INSTITUCIONALES (Sección 2 y 8) -->
+      <div class="sources-card">
+        <div class="section-header" style="text-align: left; margin-bottom: 8px;">
+          <span class="kicker"><span class="kicker-dot"></span> Evidencia Clínica</span>
+          <h3 style="font-size: 20px;">Fuentes Médicas e Institucionales</h3>
+          <p class="sub" style="margin-top: 4px;">Este contenido sintetiza lineamientos de organizaciones de referencia internacional y nacional:</p>
+        </div>
+
+        <div class="sources-grid">
+          <div class="source-item">
+            <h5>MedlinePlus (Biblioteca Nacional de EE.UU.)</h5>
+            <p>Guías para botiquín de primeros auxilios, almacenamiento seguro y medicamentos de venta libre.</p>
+            <a href="https://medlineplus.gov/spanish/firstaid.html" target="_blank" rel="noopener noreferrer">Visitar MedlinePlus ↗</a>
+          </div>
+
+          <div class="source-item">
+            <h5>Cruz Roja Americana (American Red Cross)</h5>
+            <p>Anatomy of a First Aid Kit, Travel First Aid Kit Essentials y listas de senderismo.</p>
+            <a href="https://www.redcross.org/" target="_blank" rel="noopener noreferrer">Visitar American Red Cross ↗</a>
+          </div>
+
+          <div class="source-item">
+            <h5>CDC (Centers for Disease Control and Prevention)</h5>
+            <p>Travel Health Kits: personalización de botiquines según destino, clima y riesgos epidemiológicos.</p>
+            <a href="https://wwwnc.cdc.gov/travel/page/travel-kit" target="_blank" rel="noopener noreferrer">Visitar CDC ↗</a>
+          </div>
+
+          <div class="source-item">
+            <h5>Ministerio de Salud de Colombia</h5>
+            <p>Guías de atención prehospitalaria y articulación con el Sistema de Emergencias Médicas (Línea 123).</p>
+            <a href="https://www.minsalud.gov.co/" target="_blank" rel="noopener noreferrer">Visitar Minsalud Colombia ↗</a>
+          </div>
+        </div>
+
+        <p style="font-size: 12.5px; color: var(--color-slate-gray); margin-top: 24px; line-height: 1.5; border-top: 1px solid var(--color-pebble); padding-top: 16px;">
+          <strong>Aviso institucional:</strong> Esta guía ofrece información general de preparación y primeros auxilios. No sustituye la evaluación médica profesional, la formación práctica certificada ni las normas de seguridad laboral aplicables a botiquines institucionales o industriales.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER (Calendly Style Reference) -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#" data-go="home">
+          <img src="assets/mol.png" alt="MediCore" width="24" height="24">
+          <span>MediCore</span>
+        </a>
+        <p>Tu plataforma de orientación en salud y medicamentos con la calidez y compañía de Mol.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navegación</h5>
+        <ul>
+          <li><button data-go="home">Inicio</button></li>
+          <li><button data-go="meds">Medicamentos</button></li>
+          <li><button data-go="cuida">Cuídate (IMC)</button></li>
+          <li><button data-go="mal">Me siento mal</button></li>
+          <li><button data-go="botiquin">Botiquín Esencial</button></li>
+          <li><button data-go="prep">Prepárate</button></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Aviso Legal</h5>
+        <p style="font-size: 13px; line-height: 1.6; color: var(--color-slate-gray);">
+          MediCore es una herramienta orientativa e informativa. No reemplaza bajo ninguna circunstancia la evaluación, diagnóstico o prescripción médica profesional.
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 MediCore. Todos los derechos reservados.</span>
+      <span>Inspirado en Navy ink on cool marble · Mol te acompaña siempre.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL SHEET DETALLES MEDICAMENTO -->
+<div class="overlay" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <button class="close" id="m-close" aria-label="Cerrar">✕</button>
+    <div class="m-emoji" id="m-emoji"></div>
+    <h3 id="m-name"></h3>
+    <div id="m-cat" style="margin-bottom: 16px;"></div>
+    <div class="m-sec">
+      <h4>¿Para qué sirve?</h4>
+      <p id="m-uso"></p>
+    </div>
+    <div class="m-sec">
+      <h4>Dosis común</h4>
+      <p id="m-dosis"></p>
+    </div>
+    <div class="m-sec">
+      <h4>¿Cuándo tomarlo?</h4>
+      <p id="m-cuando"></p>
+    </div>
+    <div class="m-sec">
+      <h4>Precauciones</h4>
+      <ul id="m-prec"></ul>
+    </div>
+    <div class="mol-say">
+      <img src="assets/mol.png" alt="Mol">
+      <div>
+        <b>Mol dice</b>
+        <p id="m-mol"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SHEET FICHA TÉCNICA BOTIQUÍN -->
+<div class="overlay" id="modal-ficha-botiquin" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" style="max-width: 580px;">
+    <button class="close" id="m-ficha-close" aria-label="Cerrar">✕</button>
+    <div class="m-emoji" id="ficha-emoji" style="font-size: 52px; margin-bottom: 8px;"></div>
+    <div class="ficha-meta-top">
+      <span class="botiquin-tag tag-esencial" id="ficha-tag">Esencial</span>
+      <span id="ficha-cat" style="font-size: 13px; font-weight: 600; color: var(--color-slate-gray);"></span>
+    </div>
+    <h3 id="ficha-nombre" style="font-size: 26px; color: var(--color-ink-navy); margin-bottom: 16px;"></h3>
+    
+    <div class="ficha-sec">
+      <h4>¿Para qué sirve?</h4>
+      <p id="ficha-sirve"></p>
+    </div>
+    <div class="ficha-sec">
+      <h4>¿Cuándo llevarlo?</h4>
+      <p id="ficha-cuando"></p>
+    </div>
+    <div class="ficha-sec">
+      <h4>¿Cómo conservarlo?</h4>
+      <p id="ficha-conservacion"></p>
+    </div>
+    <div class="ficha-sec">
+      <h4>Precauciones y advertencias</h4>
+      <p id="ficha-precaucion" style="color: #991b1b; font-weight: 500;"></p>
+    </div>
+    <div class="ficha-sec">
+      <h4>Fuente médica institucional</h4>
+      <p id="ficha-fuente" style="font-size: 13.5px;"></p>
+    </div>
+
+    <div class="ficha-mol-box">
+      <img src="assets/mol_paramedico.png" alt="Mol Paramédico">
+      <div>
+        <b>Mol Paramédico dice</b>
+        <p id="ficha-mol-msg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/botiquin-data.js"></script>
+<script src="js/botiquin.js"></script>
+<script src="js/agua-data.js"></script>
+<script src="js/agua.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
