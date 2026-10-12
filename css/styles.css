@@ -3384,3 +3384,38 @@ h3 {
   }
 }
 
+
+
+/* ==========================================================================
+   Asistente Mol (#s-asistente) — prototipo informativo
+   ========================================================================== */
+.ast-card { padding: 20px; }
+.ast-warning {
+  background: #fff7e0; border: 1px solid #f2d27a; color: #6b4a00;
+  border-radius: 10px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 14px;
+}
+.ast-log {
+  min-height: 300px; max-height: 52vh; overflow-y: auto; padding: 4px 2px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ast-msg { padding: 11px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; max-width: 88%; }
+.ast-msg.me { align-self: flex-end; background: var(--color-signal-blue); color: #fff; border-bottom-right-radius: 4px; }
+.ast-msg.bot { align-self: flex-start; background: var(--color-pebble); color: var(--color-ink-navy); border-bottom-left-radius: 4px; }
+.ast-msg.bot.emergency { background: #fde8e8; border: 1px solid #e57373; }
+.ast-meta { font-size: 11.5px; color: var(--color-slate-gray); margin-top: 8px; white-space: normal; }
+.ast-meta a { color: var(--color-signal-blue); }
+.ast-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.ast-chips .chip {
+  border: 1px solid var(--color-hairline); background: var(--color-paper); color: var(--color-ink-navy);
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+}
+.ast-chips .chip:hover { border-color: var(--color-signal-blue); color: var(--color-signal-blue); }
+.ast-form { display: flex; gap: 8px; margin-top: 10px; }
+.ast-form input {
+  flex: 1; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--color-hairline);
+  font: inherit; color: var(--color-ink-navy);
+}
+.ast-form input:focus { outline: 2px solid var(--color-signal-blue); outline-offset: 1px; }
+.ast-state { color: var(--color-slate-gray); font-size: 15px; font-weight: 500; margin-top: 12px; }
+#s-asistente .showcase-container { position: sticky; top: 90px; align-self: start; }
+@media (max-width: 860px) { #s-asistente .showcase-container { position: static; } }

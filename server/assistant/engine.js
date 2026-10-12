@@ -99,7 +99,7 @@ function medicationInfo(m) {
 function generalTopics(message) {
   const t = normalize(message);
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey)\b/.test(t))
-    return build('greeting', 'ok', 'Hola, soy el asistente informativo de MediCore (prototipo). Puedo darte información general sobre medicamentos del catálogo, hidratación y botiquín. No diagnostico ni receto.');
+    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre medicamentos del catálogo, hidratación y botiquín. No diagnostico ni receto.');
   if (/agua|hidrat/.test(t))
     return build('hydration', 'ok', 'Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.', { sources: S('oms'), actions: ['Abrir la calculadora de hidratación'] });
   if (/botiquin|primeros auxilios/.test(t))

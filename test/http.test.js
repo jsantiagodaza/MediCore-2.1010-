@@ -28,13 +28,17 @@ test('no expone server/, docs/ ni .git (ni path traversal)', async () => {
   for (const p of ['/server/handler.js', '/package.json', '/.git/config', '/docs/ai-safety.md', '/..%2fpackage.json'])
     assert.equal((await fetch(base + p)).status, 404, p);
 });
-test('sirve el frontend y la página del asistente', async () => {
-  assert.equal((await fetch(base + '/assistant.html')).status, 200);
+test('sirve la app con la pantalla de Mol y sus imágenes', async () => {
+  const html = await (await fetch(base + '/')).text();
+  assert.match(html, /id="s-asistente"/);
+  assert.match(html, /data-go="asistente"/);
   assert.equal((await fetch(base + '/js/assistant-ui.js')).status, 200);
+  for (const img of ['mol_paramedico', 'mol-verde', 'mol-amarillo', 'mol-rojo', 'mol-toma-agua'])
+    assert.equal((await fetch(`${base}/assets/${img}.png`)).status, 200, img);
 });
 test('la clave de IA no aparece en ningún archivo servido al frontend', async () => {
   const fs = require('node:fs'); const path = require('node:path');
   const root = path.join(__dirname, '..');
-  const files = ['assistant.html', 'index.html', ...fs.readdirSync(path.join(root, 'js')).map((f) => 'js/' + f)];
+  const files = ['index.html', ...fs.readdirSync(path.join(root, 'js')).map((f) => 'js/' + f)];
   for (const f of files) assert.doesNotMatch(fs.readFileSync(path.join(root, f), 'utf8'), /ANTHROPIC_API_KEY|x-api-key|api\.anthropic\.com/, f);
 });

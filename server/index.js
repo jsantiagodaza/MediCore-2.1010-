@@ -12,7 +12,7 @@ const hits = new Map();
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml' };
 // Solo se sirve el frontend; nunca server/, test/, docs/ ni .git
-const STATIC_OK = /^\/(index\.html|assistant\.html|css\/|js\/|assets\/)/;
+const STATIC_OK = /^\/(index\.html|css\/|js\/|assets\/)/;
 
 function limited(ip) {
   const now = Date.now();
@@ -70,6 +70,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
-  server.listen(PORT, () => console.log(`MediCore en http://localhost:${PORT}  (asistente: /assistant.html)`));
+  server.listen(PORT, () => console.log(`MediCore en http://localhost:${PORT}  (asistente: pestaña "Pregúntale a Mol")`));
 }
 module.exports = { server };
