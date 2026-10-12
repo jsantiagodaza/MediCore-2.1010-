@@ -1,0 +1,11 @@
+{
+  "name": "medicore",
+  "version": "2.1.0-assistant-prototype",
+  "private": true,
+  "description": "MediCore - prototipo de asistente médico informativo (sin dependencias externas)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  }
+}
