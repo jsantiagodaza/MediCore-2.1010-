@@ -1,4 +1,4 @@
-package com.medicore.api; // Ajusta si tu paquete es com.example.demo
+package com.medicore.api.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
