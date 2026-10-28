@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -5,16 +6,17 @@ import Medicamentos from './pages/Medicamentos';
 import './index.css';
 
 function App() {
-  // Temporalmente mostraremos Medicamentos para probarlo
   return (
-    <>
+    <BrowserRouter>
       <Header />
       <main>
-        {/* Cambia <Home /> por <Medicamentos /> para ver el catálogo */}
-        <Medicamentos />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/medicamentos" element={<Medicamentos />} />
+        </Routes>
       </main>
       <Footer />
-    </>
+    </BrowserRouter>
   );
 }
 

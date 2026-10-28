@@ -1,4 +1,6 @@
 // frontend/src/pages/Home.jsx
+import { Link } from 'react-router-dom';
+
 export default function Home() {
   return (
     <section className="screen on" id="s-home">
@@ -13,10 +15,12 @@ export default function Home() {
               </div>
               <h1>Tu salud,<br />simple.</h1>
               <p className="lead">Medicamentos, IMC y orientación de síntomas en un solo lugar, con Mol a tu lado para guiarte en cada paso.</p>
+              
               <div className="cta">
-                <button className="btn btn-primary">Evaluar síntomas</button>
-                <button className="btn btn-outline">Ver medicamentos</button>
+                <Link to="/mal" className="btn btn-primary">Evaluar síntomas</Link>
+                <Link to="/medicamentos" className="btn btn-outline">Ver medicamentos</Link>
               </div>
+              
               <div className="hero-highlights">
                 <div className="hero-highlight-item">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -74,7 +78,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features 3-Card Band */}
+      {/* Features Band */}
       <div className="band">
         <div className="wrap">
           <div className="section-header">
@@ -83,30 +87,30 @@ export default function Home() {
             <p className="lead">Herramientas simples y directas diseñadas para darte tranquilidad y respuestas médicas confiables.</p>
           </div>
           <div className="grid3">
-            <button className="card feat">
+            <Link to="/medicamentos" className="card feat">
               <div className="feat-icon-badge">💊</div>
               <h3>Medicamentos</h3>
               <p>Para qué sirven, dosis recomendadas, cuándo tomarlos y precauciones esenciales de seguridad.</p>
               <span className="link">Explorar catálogo ›</span>
-            </button>
-            <button className="card feat">
+            </Link>
+            <Link to="/cuida" className="card feat">
               <div className="feat-icon-badge">⚖️💧</div>
               <h3>Cuídate (IMC y Agua)</h3>
               <p>Calcula tu índice de masa corporal y tu ingesta diaria de agua personalizada según tu clima y actividad con Mol.</p>
               <span className="link">Calcular IMC y Agua ›</span>
-            </button>
-            <button className="card feat">
+            </Link>
+            <Link to="/mal" className="card feat">
               <div className="feat-icon-badge">🩺</div>
               <h3>Me siento mal</h3>
               <p>Selecciona tus síntomas para recibir orientación guiada, causas probables y pautas seguras.</p>
               <span className="link">Evaluar mis síntomas ›</span>
-            </button>
-            <button className="card feat">
+            </Link>
+            <Link to="/botiquin" className="card feat">
               <div className="feat-icon-badge">🎒</div>
               <h3>Botiquín Esencial <span className="badge-pill" style={{ fontSize: '11px' }}>Nuevo</span></h3>
               <p>Guías para armar, organizar y revisar botiquines seguros según tu actividad con Mol Paramédico.</p>
               <span className="link">Preparar mi botiquín ›</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

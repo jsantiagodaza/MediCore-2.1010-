@@ -243,7 +243,9 @@ a:hover {
   display: none;
 }
 
-.links button {
+.links a, .links button {
+  display: inline-flex;
+  align-items: center;
   font-size: 15px;
   font-weight: var(--font-weight-medium);
   color: var(--color-slate-gray);
@@ -252,14 +254,19 @@ a:hover {
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  text-decoration: none; /* Quita el subrayado de los enlaces */
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
-.links button:hover {
+.links a:hover, .links button:hover {
   color: var(--color-ink-navy);
   background: var(--color-pebble);
+  text-decoration: none;
 }
 
-.links button.on {
+.links a.on, .links button.on {
   color: var(--color-signal-blue);
   background: #e6f0ff;
   font-weight: var(--font-weight-semibold);
@@ -737,6 +744,8 @@ h3 {
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none; /* <--- Agrega esta línea */
+  color: inherit; /* <--- Y esta para que no se ponga azul el texto */
 }
 
 .feat::before {

@@ -1,22 +1,25 @@
-// frontend/src/components/Header.jsx
+import { NavLink, Link } from 'react-router-dom';
+
 export default function Header() {
   return (
     <header className="gnav">
       <nav className="gnav-inner" aria-label="Principal">
-        <a className="brand" href="#">
+        <Link className="brand" to="/">
           <img src="/assets/mol.png" alt="MediCore" width="28" height="28" />
           <span>MediCore</span>
-        </a>
+        </Link>
+        
         <div className="links">
-          <button className="on">Inicio</button>
-          <button>Medicamentos</button>
-          <button>Cuídate</button>
-          <button>Me siento mal</button>
-          <button>Botiquín <span className="badge-pill">Nuevo</span></button>
-          <button>Prepárate</button>
+          <NavLink to="/" className={({ isActive }) => isActive ? 'on' : ''}>Inicio</NavLink>
+          <NavLink to="/medicamentos" className={({ isActive }) => isActive ? 'on' : ''}>Medicamentos</NavLink>
+          <NavLink to="/cuida" className={({ isActive }) => isActive ? 'on' : ''}>Cuídate</NavLink>
+          <NavLink to="/mal" className={({ isActive }) => isActive ? 'on' : ''}>Me siento mal</NavLink>
+          <NavLink to="/botiquin" className={({ isActive }) => isActive ? 'on' : ''}>Botiquín <span className="badge-pill">Nuevo</span></NavLink>
+          <NavLink to="/preparate" className={({ isActive }) => isActive ? 'on' : ''}>Prepárate</NavLink>
         </div>
+        
         <div className="gnav-cta">
-          <button className="btn btn-primary btn-sm">Evaluar síntomas</button>
+          <Link to="/mal" className="btn btn-primary btn-sm">Evaluar síntomas</Link>
         </div>
       </nav>
     </header>
