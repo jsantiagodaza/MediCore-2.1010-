@@ -1,15 +1,17 @@
-// frontend/src/App.jsx
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import './index.css'; // Aseguramos que los estilos se carguen
+import Medicamentos from './pages/Medicamentos';
+import './index.css';
 
 function App() {
+  // Temporalmente mostraremos Medicamentos para probarlo
   return (
     <>
       <Header />
       <main>
-        <Home />
+        {/* Cambia <Home /> por <Medicamentos /> para ver el catálogo */}
+        <Medicamentos />
       </main>
       <Footer />
     </>
