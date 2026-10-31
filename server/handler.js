@@ -2,10 +2,9 @@
 const crypto = require('node:crypto');
 const { controlledReply, DISCLAIMER } = require('./assistant/engine');
 const { askModel, isEnabled } = require('./assistant/ai-provider');
+const { scopeFromEnv, SCOPE } = require('./assistant/intents');
 
 const MAX_MESSAGE = 1000;
-// Categorías cuya respuesta NUNCA se delega a la IA
-const DETERMINISTIC = new Set(['emergency', 'self_harm', 'prompt_injection', 'diagnosis_refused', 'prescription_refused', 'medication_info', 'greeting', 'hydration', 'first_aid_kit']);
 
 /** Lógica pura de POST /api/v1/assistant/messages. Devuelve { status, body }. */
 async function handleMessage(payload, env = process.env) {
@@ -16,9 +15,12 @@ async function handleMessage(payload, env = process.env) {
   if (!message) return { status: 400, body: { error: 'invalid_request', detail: 'El mensaje no puede estar vacío.' } };
   if (message.length > MAX_MESSAGE) return { status: 400, body: { error: 'message_too_long', detail: `Máximo ${MAX_MESSAGE} caracteres.` } };
 
-  const result = controlledReply(message);
+  const scope = scopeFromEnv(env);
+  const result = controlledReply(message, scope);
   let provider = 'controlled';
-  if (!DETERMINISTIC.has(result.category) && isEnabled(env)) {
+  // La IA solo puede intervenir en fase 2 y únicamente en preguntas fuera de las intenciones definidas.
+  // Seguridad, medicamentos y respuestas fijas son SIEMPRE deterministas.
+  if (scope >= SCOPE.PHASE2 && result.category === 'out_of_scope' && !result.safety.flags.length && isEnabled(env)) {
     const ai = await askModel(message, env);
     if (ai) { result.reply = ai; provider = 'anthropic'; }
   }

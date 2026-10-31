@@ -17,7 +17,7 @@ function loadCatalog() {
   return { meds: unique, symptoms: SYMPTOMS };
 }
 
-const ALIASES = { paracetamol: 'acetaminofen', 'vitamina d': 'vitamina d3', sro: 'suero oral (sro)', 'suero oral': 'suero oral (sro)' };
+const ALIASES = { paracetamol: 'acetaminofen', dolex: 'acetaminofen', 'vitamina d': 'vitamina d3', sro: 'suero oral (sro)', 'suero oral': 'suero oral (sro)' };
 
 function findMedication(message, meds) {
   const text = normalize(message);

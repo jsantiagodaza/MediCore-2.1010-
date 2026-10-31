@@ -1,6 +1,7 @@
 'use strict';
 const { classifySafety, normalize } = require('./safety');
 const { loadCatalog, findMedication, findSymptoms, isPrescriptionOnly, SOURCES } = require('./knowledge');
+const { isActive, scopeFromEnv, SCOPE } = require('./intents');
 
 const catalog = loadCatalog();
 
@@ -53,7 +54,7 @@ function medSummary(m) {
   const lines = [
     `${m.n} (${m.cat}): ${m.uso}`,
     `Se usa habitualmente en: ${m.cuando}`,
-    `Precauciones: ${prec.join('; ')}.`
+    `Precauciones y contraindicaciones: ${prec.join('; ')}.`
   ];
   if (hadLimits) lines.push('Los límites de dosis y duración los define tu médico o farmacéutico y están en el prospecto.');
   if (isPrescriptionOnly(m)) lines.push('Importante: este medicamento requiere prescripción médica.');
@@ -96,22 +97,54 @@ function medicationInfo(m) {
   });
 }
 
-function generalTopics(message) {
+function comingSoon(intentId, topic, section) {
+  return build(
+    'coming_soon',
+    'ok',
+    `Por ahora solo puedo ayudarte con información de los medicamentos del catálogo de MediCore. ${topic} estará disponible en una próxima versión. Mientras tanto, puedes visitar la sección “${section}” de la app.`,
+    { flags: [`planned_intent:${intentId}`], actions: [`Abrir la sección ${section}`] }
+  );
+}
+
+function generalTopics(message, scope) {
   const t = normalize(message);
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey)\b/.test(t))
-    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre medicamentos del catálogo, hidratación y botiquín. No diagnostico ni receto.');
-  if (/agua|hidrat/.test(t))
+    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto.');
+  if (/agua|hidrat/.test(t)) {
+    if (!isActive('HYDRATION', scope)) return comingSoon('HYDRATION', 'La orientación sobre hidratación', 'Cuídate → Agua');
     return build('hydration', 'ok', 'Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.', { sources: S('oms'), actions: ['Abrir la calculadora de hidratación'] });
-  if (/botiquin|primeros auxilios/.test(t))
+  }
+  if (/botiquin|primeros auxilios/.test(t)) {
+    if (!isActive('FIRST_AID_KIT', scope)) return comingSoon('FIRST_AID_KIT', 'La orientación sobre el botiquín', 'Botiquín');
     return build('first_aid_kit', 'ok', 'Un botiquín básico suele incluir material de curación (gasas, vendas, antiséptico), termómetro, guantes y los medicamentos que tu médico te haya indicado, revisando fechas de vencimiento. En la sección “Botiquín” de MediCore encuentras listas de revisión por tipo de kit. En una emergencia, llama al 123.', { sources: S('minsalud'), actions: ['Abrir la sección Botiquín'] });
+  }
   return null;
+}
+
+// Preguntas comerciales: aunque nombren un medicamento del catálogo, no son de información (OOS_COMMERCIAL)
+const COMMERCIAL = /cuesta|precio|cuanto vale|cuanto sale|mas barato|donde (lo |la )?(compro|consigo|venden|encuentro)|comprar|disponib|descuento|(marca|generico).{0,25}(mejor|recomend)|cual es mejor/;
+// Parece una pregunta de información de medicamento (MED_NOT_FOUND si no está en el catálogo)
+const MED_QUESTION = /para que (sirve|se usa|es)|contraindic|precauc|informacion (de|del|de la|sobre)|hablame (de|del|sobre)|que (sabes|me dices) (de|del|sobre)/;
+
+function commercial() {
+  return build('out_of_scope', 'ok', 'No manejo precios, compra ni disponibilidad de medicamentos: mi catálogo solo tiene información general (para qué sirven, cuándo se usan y sus precauciones). Para precios o dónde conseguirlos, consulta en una farmacia.', { flags: ['oos_commercial'], actions: ['Consultar en una farmacia'] });
+}
+
+function notFound() {
+  const examples = ['Ibuprofeno', 'Loratadina', 'Omeprazol'].filter((n) => catalog.meds.some((m) => m.n === n));
+  return build(
+    'medication_not_found',
+    'ok',
+    `No encontré ese medicamento en el catálogo de MediCore, así que no tengo información para darte. Revisa la ortografía o prueba con el nombre genérico${examples.length ? ` (por ejemplo: ${examples.join(', ')})` : ''}. Para cualquier medicamento, el prospecto y tu farmacéutico son la fuente confiable.`,
+    { flags: ['medication_not_in_catalog'], actions: ['Revisar la ortografía', 'Consultar a un farmacéutico'] }
+  );
 }
 
 function fallback() {
   return build(
     'out_of_scope',
     'ok',
-    'Por ahora (prototipo) solo puedo darte información general sobre medicamentos del catálogo de MediCore, hidratación y botiquín. No diagnostico ni receto. Prueba preguntando, por ejemplo: “¿Para qué sirve la loratadina?”.',
+    'Por ahora (prototipo) solo puedo darte información general sobre los medicamentos del catálogo de MediCore: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto. Prueba preguntando, por ejemplo: “¿Para qué sirve la loratadina?”.',
     { actions: ['Reformular la pregunta', 'Consultar a un profesional de la salud'] }
   );
 }
@@ -119,8 +152,9 @@ function fallback() {
 /**
  * Respuesta controlada (determinista). Es también el respaldo cuando no hay IA
  * o cuando la salida de la IA incumple el filtro de seguridad.
+ * `scope` define qué intenciones están activas (ver intents.js). Por defecto: fase 1.
  */
-function controlledReply(message) {
+function controlledReply(message, scope = SCOPE.PHASE1) {
   switch (classifySafety(message)) {
     case 'emergency': return emergency();
     case 'self_harm': return selfHarm();
@@ -128,9 +162,13 @@ function controlledReply(message) {
     case 'diagnosis': return diagnosis(message);
     case 'prescription': return prescription(message);
   }
+  const norm = normalize(message);
   const med = findMedication(message, catalog.meds);
-  if (med) return medicationInfo(med);
-  return generalTopics(message) || fallback();
+  if (med) return COMMERCIAL.test(norm) ? commercial() : medicationInfo(med);
+  const topic = generalTopics(message, scope);
+  if (topic) return topic;
+  if (MED_QUESTION.test(norm)) return notFound();
+  return fallback();
 }
 
-module.exports = { controlledReply, DISCLAIMER, catalog };
+module.exports = { controlledReply, DISCLAIMER, catalog, scopeFromEnv };
