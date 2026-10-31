@@ -24,6 +24,8 @@
     if (data.safety.level === 'refused' || data.safety.level === 'blocked') return ['warn', 'Eso no lo puedo hacer, pero te cuento qué sí.'];
     if (data.category === 'hydration') return ['water', '¡A hidratarse!'];
     if (data.category === 'first_aid_kit') return ['normal', 'Mol Paramédico al rescate.'];
+    if (data.category === 'medication_not_found') return ['normal', 'No tengo ese medicamento en mi catálogo.'];
+    if (data.category === 'coming_soon') return ['normal', 'Eso llegará en una próxima versión.'];
     if (data.category === 'medication_info') return ['ok', 'Información general, siempre confirma con un profesional.'];
     return ['normal', 'Hola, soy Mol Paramédico. ¿En qué te ayudo?'];
   }
@@ -73,7 +75,7 @@
     }
   }
 
-  add('bot', 'Hola, soy Mol Paramédico 🩺 (prototipo). Puedo darte información general sobre medicamentos del catálogo, hidratación y botiquín. No diagnostico ni receto.');
+  add('bot', 'Hola, soy Mol Paramédico 🩺 (prototipo). Puedo darte información general sobre los medicamentos del catálogo: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto.');
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
