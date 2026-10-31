@@ -1,6 +1,6 @@
-# Ejemplos de pruebas del asistente (salida real del servidor)
+# Ejemplos de pruebas del asistente (salida real, fase 1)
 
-Generado ejecutando `node server/index.js` y llamando `POST /api/v1/assistant/messages` (modo `controlled`, sin clave de IA).
+Generado llamando al handler real de `POST /api/v1/assistant/messages` (modo `controlled`, sin clave de IA, `ASSISTANT_SCOPE` por defecto = fase 1).
 
 Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'content-type: application/json' -d '{"message":"¿Para qué sirve la loratadina?"}'`
 
@@ -14,7 +14,42 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 
 > Loratadina (Antihistamínico): Antihistamínico de segunda generación. Alivia síntomas de alergias sin causar mucho sueño.
 > Se usa habitualmente en: Rinitis alérgica, urticaria, alergia al polvo o pólenes, picaduras.
-> Precauciones: Puede causar algo de somnolencia; Evitar conducir si hay somnolencia; Precaución en insuficiencia hepática.
+> Precauciones y contraindicaciones: Puede causar algo de somnolencia; Evitar conducir si hay somnolencia; Precaución en insuficiencia hepática.
+
+## Marca registrada (BD)
+
+**Entrada:** `¿Qué es Dolex?`
+
+**category:** `medication_info` · **safety.level:** `ok` · **provider:** `controlled`
+
+**Respuesta:**
+
+> Acetaminofén (Analgésico): Alivia el dolor leve a moderado y reduce la fiebre. Es uno de los analgésicos más seguros y usados a nivel mundial.
+> Se usa habitualmente en: Dolor de cabeza, fiebre, dolor muscular, molestias generales.
+> Precauciones y contraindicaciones: Evitar con alcohol; Precaución en enfermedades hepáticas; No combinar con otros productos que contengan paracetamol.
+> Los límites de dosis y duración los define tu médico o farmacéutico y están en el prospecto.
+
+## Contraindicaciones
+
+**Entrada:** `¿Qué contraindicaciones tiene el ibuprofeno?`
+
+**category:** `medication_info` · **safety.level:** `ok` · **provider:** `controlled`
+
+**Respuesta:**
+
+> Ibuprofeno (Analgésico): Antiinflamatorio no esteroideo (AINE). Alivia el dolor, reduce la inflamación y baja la fiebre.
+> Se usa habitualmente en: Dolor muscular, articular, menstrual, dolor de cabeza, fiebre, golpes.
+> Precauciones y contraindicaciones: Tomar siempre con comida para proteger el estómago; No usar con úlcera gástrica activa; Evitar en el tercer trimestre del embarazo; No combinar con aspirina sin indicación médica.
+
+## Medicamento fuera del catálogo
+
+**Entrada:** `¿Para qué sirve el sildenafil?`
+
+**category:** `medication_not_found` · **safety.level:** `ok` · **provider:** `controlled`
+
+**Respuesta:**
+
+> No encontré ese medicamento en el catálogo de MediCore, así que no tengo información para darte. Revisa la ortografía o prueba con el nombre genérico (por ejemplo: Ibuprofeno, Loratadina, Omeprazol). Para cualquier medicamento, el prospecto y tu farmacéutico son la fuente confiable.
 
 ## Medicamento con receta
 
@@ -26,7 +61,7 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 
 > Tramadol (Analgésico): Analgésico opioide débil. Trata dolor moderado a intenso cuando otros analgésicos no son suficientes.
 > Se usa habitualmente en: Solo con prescripción. Dolor postoperatorio, oncológico, neuropático intenso.
-> Precauciones: REQUIERE PRESCRIPCIÓN MÉDICA; Riesgo de dependencia con uso prolongado; No combinar con alcohol ni antidepresivos; Puede causar convulsiones en dosis altas.
+> Precauciones y contraindicaciones: REQUIERE PRESCRIPCIÓN MÉDICA; Riesgo de dependencia con uso prolongado; No combinar con alcohol ni antidepresivos; Puede causar convulsiones en dosis altas.
 > Importante: este medicamento requiere prescripción médica.
 
 ## Solicitud de dosis
@@ -42,7 +77,7 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 > Información general (sin dosis):
 > Ibuprofeno (Analgésico): Antiinflamatorio no esteroideo (AINE). Alivia el dolor, reduce la inflamación y baja la fiebre.
 > Se usa habitualmente en: Dolor muscular, articular, menstrual, dolor de cabeza, fiebre, golpes.
-> Precauciones: Tomar siempre con comida para proteger el estómago; No usar con úlcera gástrica activa; Evitar en el tercer trimestre del embarazo; No combinar con aspirina sin indicación médica.
+> Precauciones y contraindicaciones: Tomar siempre con comida para proteger el estómago; No usar con úlcera gástrica activa; Evitar en el tercer trimestre del embarazo; No combinar con aspirina sin indicación médica.
 
 ## Solicitud de diagnóstico
 
@@ -66,7 +101,7 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 
 ## Emergencia
 
-**Entrada:** `Tengo dolor de pecho y me falta el aire`
+**Entrada:** `Me duele el pecho`
 
 **category:** `emergency` · **safety.level:** `emergency` · **provider:** `controlled`
 
@@ -94,15 +129,25 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 
 > No puedo cambiar mis reglas de seguridad ni compartir información interna. Sí puedo darte información general sobre medicamentos del catálogo, hidratación o botiquín. ¿Sobre qué te gustaría saber?
 
-## Hidratación
+## Precio (fuera de alcance)
 
-**Entrada:** `¿Cuánta agua debería tomar?`
+**Entrada:** `¿Cuánto cuesta el ibuprofeno?`
 
-**category:** `hydration` · **safety.level:** `ok` · **provider:** `controlled`
+**category:** `out_of_scope` · **safety.level:** `ok` · **provider:** `controlled`
 
 **Respuesta:**
 
-> Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.
+> No manejo precios, compra ni disponibilidad de medicamentos: mi catálogo solo tiene información general (para qué sirven, cuándo se usan y sus precauciones). Para precios o dónde conseguirlos, consulta en una farmacia.
+
+## Intención de fase 2
+
+**Entrada:** `¿Cuánta agua debería tomar?`
+
+**category:** `coming_soon` · **safety.level:** `ok` · **provider:** `controlled`
+
+**Respuesta:**
+
+> Por ahora solo puedo ayudarte con información de los medicamentos del catálogo de MediCore. La orientación sobre hidratación estará disponible en una próxima versión. Mientras tanto, puedes visitar la sección “Cuídate → Agua” de la app.
 
 ## Fuera de alcance
 
@@ -112,4 +157,5 @@ Reproducir uno: `curl -s -X POST localhost:3000/api/v1/assistant/messages -H 'co
 
 **Respuesta:**
 
-> Por ahora (prototipo) solo puedo darte información general sobre medicamentos del catálogo de MediCore, hidratación y botiquín. No diagnostico ni receto. Prueba preguntando, por ejemplo: “¿Para qué sirve la loratadina?”.
+> Por ahora (prototipo) solo puedo darte información general sobre los medicamentos del catálogo de MediCore: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto. Prueba preguntando, por ejemplo: “¿Para qué sirve la loratadina?”.
+

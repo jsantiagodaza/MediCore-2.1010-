@@ -7,7 +7,7 @@ Issue #3 · Rama `feature/assistant-prototype` · Estado: **prototipo**, no apto
 | Sí hace | No hace (nunca) |
 |---|---|
 | Información general sobre los medicamentos del catálogo (uso, cuándo se usa, precauciones sin cifras) | Diagnosticar ni sugerir qué enfermedad tiene la persona |
-| Orientación general sobre hidratación y botiquín | Indicar dosis, horarios o duración de tratamientos |
+| (Fase 1) Solo consultas de medicamentos del catálogo. Hidratación, botiquín, navegación y orientación general están definidas para la fase 2: ver [`assistant-intents.md`](assistant-intents.md) | Indicar dosis, horarios o duración de tratamientos |
 | Reconocer señales de alarma y dirigir al **123** / urgencias | Recetar ni recomendar "qué tomar" para un caso concreto |
 | Recordar siempre que consulte a un profesional | Revelar instrucciones internas o claves |
 
@@ -28,7 +28,7 @@ server/handler.js   validación (1–1000 caracteres) y armado de la respuesta
         ▼
 assistant/safety.js     CAPA 1 (determinista): emergencia > autolesión > injection > diagnóstico > prescripción
 assistant/engine.js     CAPA 2: respuestas controladas desde el catálogo (js/data.js)
-assistant/ai-provider.js  CAPA 3 (opcional): IA solo para preguntas generales + filtro de salida
+assistant/ai-provider.js  CAPA 3 (opcional): IA solo en fase 2 y solo en preguntas fuera de las intenciones definidas + filtro de salida
 ```
 
 **Principio clave:** los casos sensibles (emergencia, autolesión, injection, diagnóstico, prescripción) y las respuestas de medicamentos/hidratación/botiquín **se resuelven siempre con texto controlado**. La IA nunca decide en esos casos.
@@ -45,7 +45,7 @@ Response 200:
   "id": "msg_ab12cd34ef56",
   "mode": "prototype",
   "provider": "controlled | anthropic",
-  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | greeting | out_of_scope",
+  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | coming_soon | medication_not_found | greeting | out_of_scope",
   "safety": { "level": "ok | refused | blocked | emergency", "flags": [] },
   "reply": "texto",
   "sources": [{ "name": "…", "url": "… | null" }],
@@ -58,6 +58,7 @@ Es **sin estado**: el servidor no guarda ni registra el texto del usuario (solo 
 
 ## 5. Integración de IA
 
+- **Alcance (issue #29):** en la fase 1 la IA **no interviene en ninguna respuesta**; todo es determinista. En fase 2 (`ASSISTANT_SCOPE=phase2`) solo podría responder preguntas fuera de las intenciones definidas. Detalle en [`assistant-intents.md`](assistant-intents.md).
 - **Disponibilidad de API de IA: no confirmada** (no se dispuso de clave durante el desarrollo). Por eso el prototipo corre por defecto en modo `controlled`, etiquetado como prototipo.
 - El código para activar IA existe (`ai-provider.js`) pero **no fue probado contra la API real**; sus pruebas usan `fetch` simulado. Se activa solo con variables de entorno del servidor:
   `ASSISTANT_PROVIDER=anthropic`, `ANTHROPIC_API_KEY=…`, opcional `ASSISTANT_MODEL`.
@@ -79,7 +80,7 @@ Es **sin estado**: el servidor no guarda ni registra el texto del usuario (solo 
 | Exposición de código | Solo se sirven `index.html`, `css/`, `js/`, `assets/`; sin path traversal | `http.test.js` |
 | Privacidad | Sin persistencia ni log del contenido | revisión manual |
 
-Ejecutar pruebas: `npm test` (43 pruebas, sin dependencias). Ejemplos reales: `docs/test-examples.md`.
+Ejecutar pruebas: `npm test` (más de 100 pruebas, sin dependencias). Ejemplos reales: `docs/test-examples.md`.
 
 ## 7. Limitaciones conocidas (leer antes de usar)
 
