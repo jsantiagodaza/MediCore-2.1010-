@@ -16,6 +16,8 @@ const normalize = (s) =>
 const RULES = {
   emergency: [
     /dolor (de |en el |en mi )?(pecho|torax)/,
+    /me duele (mucho |bastante |demasiado )?(el |mi )?(pecho|torax|corazon)|(pecho|corazon).{0,15}(me )?(duele|aprieta|oprime)|(opresion|presion|peso) en (el )?pecho/,
+    /me falta (el )?(aire|la respiracion)|me cuesta (mucho )?respirar/,
     /(no puedo|dificultad (para|al)) respirar|me ahogo|falta de aire (intensa|severa|fuerte)/,
     /perdi (el )?conocimiento|inconsciente|no reacciona|me desmaye|se desmayo/,
     /convulsi/,
