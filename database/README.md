@@ -1,83 +1,37 @@
-# MediCore – Base de datos
-
-Esquema de medicamentos (issue #4). Rama: `feature/database-schema`.
-
-**Tecnologías:** PostgreSQL 13+, SQL, `psql` / pgAdmin, Git Bash.
+# Base de datos MediCore (PostgreSQL)
 
 ## Estructura
+- `schema/` migraciones versionadas (001 medicines, 002 users, 003 índices, 004 favoritos)
+- `seeds/` datos **de demostración** (separados del esquema; no son datos reales)
+- `queries/` consultas principales (#27)
+- `docs/er-diagram.md` modelo ER
+- `migrate.sh` ejecuta migraciones pendientes y, opcionalmente, los seeds
 
-```
-database/
-├── schema/001_create_medicines.sql   # crea la tabla, restricciones e índices
-├── seeds/001_seed_medicines.sql      # datos iniciales
-├── docs/er_diagram.mermaid           # diagrama ER
-└── README.md
-```
-
-## Modelo ER
-
-```mermaid
-erDiagram
-    MEDICINES {
-        BIGINT       id                  PK "GENERATED ALWAYS AS IDENTITY"
-        VARCHAR_150  name                "NOT NULL"
-        VARCHAR_150  active_ingredient   "NOT NULL"
-        VARCHAR_50   strength            "NOT NULL"
-        VARCHAR_50   pharmaceutical_form "NOT NULL"
-    }
-```
-
-### Tabla `medicines`
-
-| Campo                 | Tipo           | Restricciones                          |
-|-----------------------|----------------|----------------------------------------|
-| `id`                  | `BIGINT`       | PK, autogenerado (identity)            |
-| `name`                | `VARCHAR(150)` | NOT NULL, no vacío                     |
-| `active_ingredient`   | `VARCHAR(150)` | NOT NULL, no vacío                     |
-| `strength`            | `VARCHAR(50)`  | NOT NULL, no vacío (ej. `500 mg`)      |
-| `pharmaceutical_form` | `VARCHAR(50)`  | NOT NULL, no vacío (ej. `Tableta`)     |
-
-- **Unicidad:** `(name, strength, pharmaceutical_form)` no se puede repetir.
-- **Índices:** `lower(name)` y `lower(active_ingredient)` para búsquedas sin distinguir mayúsculas.
-
-## Cómo ejecutarlo (desde una base vacía)
-
-Desde la raíz del repositorio, en Git Bash:
-
+## Ejecutar desde una base vacía (Git Bash)
 ```bash
-# 1. Crear la base de datos
-createdb -U postgres medicore
-
-# 2. Crear el esquema
-psql -U postgres -d medicore -v ON_ERROR_STOP=1 -f database/schema/001_create_medicines.sql
-
-# 3. Cargar los datos iniciales
-psql -U postgres -d medicore -v ON_ERROR_STOP=1 -f database/seeds/001_seed_medicines.sql
+psql -U postgres -c "CREATE DATABASE medicore;"
+export DATABASE_URL=postgresql://postgres:TU_CLAVE@localhost:5432/medicore
+WITH_SEEDS=1 bash database/migrate.sh
 ```
+Sin `WITH_SEEDS=1` solo se crea el esquema. Volver a ejecutarlo es seguro: las migraciones aplicadas se registran en `schema_migrations` y los seeds usan `ON CONFLICT DO NOTHING`.
 
-Con **pgAdmin**: crear la base `medicore`, abrir *Query Tool* y ejecutar primero
-`001_create_medicines.sql` y luego `001_seed_medicines.sql`.
-
-Ambos scripts son **idempotentes**: se pueden volver a ejecutar sin errores ni duplicados.
-
-## Verificación
-
+## Verificar
 ```sql
-SELECT count(*) FROM medicines;                                   -- 12
-SELECT * FROM medicines WHERE lower(name) LIKE 'amox%';           -- 2 filas
+\dt
+SELECT count(*) FROM medicines;   -- 6
+SELECT email, role FROM users;    -- 2 usuarios demo
 ```
 
-Consulta de ejemplo para el backend:
-
-```sql
-SELECT id, name, active_ingredient, strength, pharmaceutical_form
-FROM medicines
-WHERE lower(name) LIKE lower('%' || :search || '%')
-ORDER BY name;
+## Verificación de persistencia desde Spring Boot (#28)
+`application.properties`:
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/medicore
+spring.datasource.username=postgres
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=validate   # NO create/create-drop: el esquema lo manda database/
 ```
-
-## Acuerdo con backend
-
-Campos iniciales: `id`, `name`, `active_ingredient`, `strength`, `pharmaceutical_form`.
-Cualquier campo nuevo (precio, stock, etc.) se agrega con un script nuevo
-(`002_...sql`), sin modificar el `001`.
+Pasos:
+1. Arrancar la app y consultar el catálogo por la API (ej. `GET /api/medicines`): deben aparecer los 6 seeds.
+2. Crear un medicamento por la API, **reiniciar la aplicación** y consultarlo de nuevo: debe seguir ahí.
+3. Confirmar en `psql` que la fila existe y que no hay listas en memoria (`List<Medicine>` estáticas) en servicios/repositorios.
+4. Si usa JPA: la entidad debe mapear `@Table(name = "medicines")` y `@Column(name = "active_ingredient")`, etc. (o `SpringPhysicalNamingStrategy` por defecto).
