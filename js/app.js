@@ -41,7 +41,11 @@ const medIcon = (med) => {
 };
 
 /* Quita medicamentos repetidos en los datos (conserva el primero) */
-const MEDS_UNIQUE = [...new Map(MEDS.map((m) => [m.n, m])).values()];
+const MEDS_UNIQUE = [
+  ...new Map(
+    MedsRepository.getAll().map((m) => [m.n, m])
+  ).values()
+];
 
 /* ---------- Navegación ---------- */
 const MOL_MSGS = {
