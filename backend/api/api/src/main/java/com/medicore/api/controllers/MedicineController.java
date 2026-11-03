@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.medicore.api.models.Medicine;
 import com.medicore.api.services.MedicineService;
 
+/**
+ * Controlador delgado: recibe la peticion, delega en el servicio y devuelve
+ * la respuesta. La busqueda, la normalizacion, los filtros y las validaciones
+ * viven en {@link MedicineService}.
+ */
 @RestController
 @RequestMapping("/api/v1/medicines")
 public class MedicineController {
@@ -22,12 +27,12 @@ public class MedicineController {
         this.medicineService = medicineService;
     }
 
-    /** GET /api/v1/medicines?search=ibuprofeno&category=Analgesico */
+    /** GET /api/v1/medicines?search=acetaminofen&category=Analgesico */
     @GetMapping
     public List<Medicine> getMedicines(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "category", required = false) String category) {
-        return medicineService.getMedicines(search, category);
+        return medicineService.search(search, category);
     }
 
     /** GET /api/v1/medicines/categories -> ["Analgesico", "Antibiotico", ...] */
