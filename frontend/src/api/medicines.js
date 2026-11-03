@@ -1,15 +1,7 @@
 // frontend/src/api/medicines.js
 // Cliente HTTP del catálogo de medicamentos (backend Spring Boot).
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
-
-async function request(path, signal) {
-  const respuesta = await fetch(`${BASE_URL}${path}`, { signal });
-  if (!respuesta.ok) {
-    throw new Error(`El backend respondió ${respuesta.status} en ${path}`);
-  }
-  return respuesta.json();
-}
+import { requestJson } from './client';
 
 /**
  * GET /api/v1/medicines?search=&category=
@@ -28,10 +20,10 @@ export function fetchMedicines({ search, category, signal } = {}) {
     params.set('category', category);
   }
   const query = params.toString();
-  return request(`/api/v1/medicines${query ? `?${query}` : ''}`, signal);
+  return requestJson(`/api/v1/medicines${query ? `?${query}` : ''}`, { signal });
 }
 
 /** GET /api/v1/medicines/categories -> ["Analgésico", "Antibiótico", ...] */
 export function fetchCategories(signal) {
-  return request('/api/v1/medicines/categories', signal);
+  return requestJson('/api/v1/medicines/categories', { signal });
 }
