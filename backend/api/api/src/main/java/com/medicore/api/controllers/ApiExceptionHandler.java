@@ -126,6 +126,7 @@ public class ApiExceptionHandler {
         return respuesta(HttpStatus.NOT_FOUND, "No encontrado", e.getMessage(), request);
     }
 
+        
     @ExceptionHandler({ NoResourceFoundException.class, NoHandlerFoundException.class })
     public ResponseEntity<Map<String, Object>> rutaNoExiste(Exception e, HttpServletRequest request) {
         return respuesta(HttpStatus.NOT_FOUND, "No encontrado",
