@@ -86,10 +86,12 @@ public class DbHealthController {
         return on > 0 ? head.substring(0, on).trim() : head;
     }
 
-    /** Evita exponer credenciales que aparezcan en el mensaje de error. */
-    private String safeMessage(Exception e) {
-        Throwable cause = e.getMostSpecificCause();
-        String msg = (cause != null && cause.getMessage() != null) ? cause.getMessage() : e.getMessage();
+     private String safeMessage(DataAccessException e) {
+        Throwable cause = e;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        String msg = cause.getMessage() != null ? cause.getMessage() : e.getMessage();
         if (msg == null) {
             msg = e.getClass().getSimpleName();
         }
