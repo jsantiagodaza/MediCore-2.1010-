@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- Hash de contrasenas (BCrypt) sin traer todo Spring Security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- Migraciones de base de datos: crean el esquema y cargan los datos -->
         <dependency>
             <groupId>org.flywaydb</groupId>
