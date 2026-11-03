@@ -1,37 +1,60 @@
 package com.medicore.api.services;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.medicore.api.models.Medicine;
+import com.medicore.api.repositories.MedicineRepository;
 
-@Service // Le dice a Spring que esta clase maneja la lógica del negocio
+/**
+ * Logica de negocio de medicamentos.
+ * Ya no hay ninguna lista en memoria: todo se consulta a la base de datos.
+ */
+@Service
+@Transactional(readOnly = true)
 public class MedicineService {
 
-    // Lista en memoria para simular una base de datos temporal
-    private final List<Medicine> temporaryDatabase = new ArrayList<>();
+    private final MedicineRepository medicineRepository;
 
-    // Este constructor se ejecuta apenas corre el programa y llena datos de prueba
-    public MedicineService() {
-        temporaryDatabase.add(new Medicine(1L, "Ibuprofeno", "Analgésico y antiinflamatorio", "Analgésicos"));
-        temporaryDatabase.add(new Medicine(2L, "Acetaminofén", "Alivio del dolor y la fiebre", "Analgésicos"));
-        temporaryDatabase.add(new Medicine(3L, "Amoxicilina", "Antibiótico para infecciones", "Antibióticos"));
-        temporaryDatabase.add(new Medicine(4L, "Loratadina", "Antihistamínico para alergias", "Antihistamínicos"));
+    public MedicineService(MedicineRepository medicineRepository) {
+        this.medicineRepository = medicineRepository;
     }
 
-    // Método para retornar toda la lista
-    public List<Medicine> getAllMedicines() {
-        return temporaryDatabase;
+    public List<Medicine> getMedicines(String search, String category) {
+        boolean hasSearch = search != null && !search.isBlank();
+        boolean hasCategory = category != null && !category.isBlank();
+
+        if (hasSearch && hasCategory) {
+            return medicineRepository.findByCategoryIgnoreCaseOrderByNameAsc(category).stream()
+                    .filter(m -> contains(m.getName(), search) || contains(m.getCategory(), search))
+                    .toList();
+        }
+        if (hasSearch) {
+            return medicineRepository
+                    .findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCaseOrderByNameAsc(search, search);
+        }
+        if (hasCategory) {
+            return medicineRepository.findByCategoryIgnoreCaseOrderByNameAsc(category);
+        }
+        return medicineRepository.findAll(org.springframework.data.domain.Sort.by("name"));
     }
 
-    // Método para filtrar la lista según lo que escriba el usuario en el buscador
-    public List<Medicine> searchMedicines(String query) {
-        return temporaryDatabase.stream()
-                .filter(m -> m.getName().toLowerCase().contains(query.toLowerCase()) 
-                          || m.getCategory().toLowerCase().contains(query.toLowerCase()))
-                .collect(Collectors.toList());
+    public Optional<Medicine> getById(Long id) {
+        return medicineRepository.findById(id);
+    }
+
+    public List<String> getCategories() {
+        return medicineRepository.findDistinctCategories();
+    }
+
+    public long count() {
+        return medicineRepository.count();
+    }
+
+    private boolean contains(String value, String search) {
+        return value != null && value.toLowerCase().contains(search.toLowerCase());
     }
 }
