@@ -2,7 +2,9 @@ package com.medicore.api.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,18 +18,29 @@ public class MedicineController {
 
     private final MedicineService medicineService;
 
-    // Inyección de dependencias: Traemos el servicio para usar sus funciones
     public MedicineController(MedicineService medicineService) {
         this.medicineService = medicineService;
     }
 
+    /** GET /api/v1/medicines?search=ibuprofeno&category=Analgesico */
     @GetMapping
-    public List<Medicine> getMedicines(@RequestParam(value = "search", required = false) String search) {
-        // Si el usuario usó el buscador (ej: ?search=Ibuprofeno)
-        if (search != null && !search.isEmpty()) {
-            return medicineService.searchMedicines(search);
-        }
-        // Si no buscó nada, mandamos la lista completa
-        return medicineService.getAllMedicines();
+    public List<Medicine> getMedicines(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "category", required = false) String category) {
+        return medicineService.getMedicines(search, category);
+    }
+
+    /** GET /api/v1/medicines/categories -> ["Analgesico", "Antibiotico", ...] */
+    @GetMapping("/categories")
+    public List<String> getCategories() {
+        return medicineService.getCategories();
+    }
+
+    /** GET /api/v1/medicines/12 */
+    @GetMapping("/{id}")
+    public ResponseEntity<Medicine> getById(@PathVariable Long id) {
+        return medicineService.getById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
