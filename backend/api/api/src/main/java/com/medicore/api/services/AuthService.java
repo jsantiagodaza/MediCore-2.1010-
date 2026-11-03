@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.medicore.api.dto.AuthResult;
 import com.medicore.api.exceptions.CredencialesInvalidasException;
 import com.medicore.api.exceptions.EmailYaRegistradoException;
+import com.medicore.api.exceptions.SesionNoEncontradaException;
 import com.medicore.api.exceptions.TokenInvalidoException;
 import com.medicore.api.models.User;
 import com.medicore.api.models.UserSession;
@@ -115,6 +117,33 @@ public class AuthService {
                     sesion.setRevoked(true);
                     sessionRepository.save(sesion);
                 });
+    }
+
+    /** Sesiones activas del usuario (no revocadas y sin caducar). */
+    @Transactional(readOnly = true)
+    public List<UserSession> listActiveSessions(User usuario) {
+        return sessionRepository.findByUserAndRevokedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
+                usuario, LocalDateTime.now());
+    }
+
+    /**
+     * Revoca una sesion del propio usuario.
+     *
+     * Si la sesion no existe o es de otra persona se lanza la misma excepcion:
+     * asi no se puede averiguar que sesiones ajenas existen.
+     */
+    public void revokeSession(User usuario, Long sessionId) {
+        UserSession sesion = sessionRepository.findById(sessionId)
+                .filter(s -> s.getUser().getId().equals(usuario.getId()))
+                .orElseThrow(SesionNoEncontradaException::new);
+
+        sesion.setRevoked(true);
+        sessionRepository.save(sesion);
+    }
+
+    /** Huella SHA-256 de un token, para comparar sin exponerlo. */
+    public String fingerprintOf(String token) {
+        return hashToken(requerirToken(token));
     }
 
     // ------------------------------------------------------------------

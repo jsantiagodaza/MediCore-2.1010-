@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.medicore.api.exceptions.CredencialesInvalidasException;
 import com.medicore.api.exceptions.EmailYaRegistradoException;
+import com.medicore.api.exceptions.SesionNoEncontradaException;
 import com.medicore.api.exceptions.TokenInvalidoException;
 
 /**
@@ -47,6 +48,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(EmailYaRegistradoException.class)
     public ResponseEntity<Map<String, Object>> emailRegistrado(EmailYaRegistradoException e) {
         return respuesta(HttpStatus.CONFLICT, "Conflicto", e.getMessage());
+    }
+
+    @ExceptionHandler(SesionNoEncontradaException.class)
+    public ResponseEntity<Map<String, Object>> sesionNoEncontrada(SesionNoEncontradaException e) {
+        return respuesta(HttpStatus.NOT_FOUND, "No encontrado", e.getMessage());
     }
 
     private ResponseEntity<Map<String, Object>> respuesta(HttpStatus estado, String error, String mensaje) {
