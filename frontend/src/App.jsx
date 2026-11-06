@@ -2,7 +2,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import PrivateRoute from './components/PrivateRoute'; // <-- Importamos el guardia
+import PrivateRoute from './components/PrivateRoute'; 
+import ChatAssistant from './components/ChatAssistant'; // 1. IMPORTANTE: Que esté esta línea
 import Home from './pages/Home';
 import MeSientoMal from './pages/MeSientoMal';
 import Cuida from './pages/Cuida';
@@ -18,14 +19,12 @@ function App() {
       <Header />
       <main>
         <Routes>
-          {/* 1. Rutas Públicas (Cualquiera puede entrar) */}
           <Route path="/" element={<Home />} />
           <Route path="/medicamentos" element={<Medicamentos />} />
           <Route path="/login" element={<Login />} />
           <Route path="/mal" element={<MeSientoMal />} />
           <Route path="/preparate" element={<Preparate />} />
 
-          {/* 2. Rutas Protegidas (Requieren iniciar sesión) */}
           <Route element={<PrivateRoute />}>
             <Route path="/cuida" element={<Cuida />} />
             <Route path="/botiquin" element={<Botiquin />} />
@@ -33,6 +32,9 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      
+      {/* 2. IMPORTANTE: Que esté montado aquí, fuera de las rutas */}
+      <ChatAssistant /> 
     </BrowserRouter>
   );
 }
