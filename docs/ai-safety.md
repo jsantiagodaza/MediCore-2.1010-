@@ -33,9 +33,11 @@ assistant/ai-provider.js  CAPA 3 (opcional): IA solo en fase 2 y solo en pregunt
 
 **Principio clave:** los casos sensibles (emergencia, autolesión, injection, diagnóstico, prescripción) y las respuestas de medicamentos/hidratación/botiquín **se resuelven siempre con texto controlado**. La IA nunca decide en esos casos.
 
-## 4. Contrato de API (acordado con backend)
+## 4. Contrato de API
 
-`POST /api/v1/assistant/messages` · `Content-Type: application/json`
+> **Actualización (issue #29):** el contrato **vigente** es el del backend Spring (`AssistantController`): `POST /api/v1/assistant/messages`, ruta privada con token de sesión, mensaje de hasta 500 caracteres, respuesta `{ id, respuesta, intent, confianza, emergencia, sugerencias, fuentes, datos, timestamp }` con `intent` ∈ `SALUDO | MEDICAMENTO | SINTOMAS | EMERGENCIA | FUERA_DE_ALCANCE | NO_ENTENDIDO`. Ver [`assistant-intents.md`](assistant-intents.md) §6.
+>
+> Lo que sigue describe el contrato del **prototipo Node** (`server/`), que ahora funciona como **referencia de comportamiento** y de pruebas, no como backend de producción.
 
 Request: `{ "message": "string (1–1000)" }`
 

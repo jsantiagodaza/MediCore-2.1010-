@@ -3,10 +3,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { INTENTS, SCOPE, isActive, scopeFromEnv, byKind } = require('../server/assistant/intents');
+const { INTENTS, EXTRA_CASES, SCOPE, isActive, scopeFromEnv, byKind, backendFor } = require('../server/assistant/intents');
 const { controlledReply, catalog } = require('../server/assistant/engine');
 const { handleMessage } = require('../server/handler');
-const { render, OUT } = require('../scripts/gen-intents-doc');
+const { render, renderCases, OUT, OUT_JSON } = require('../scripts/gen-intents-doc');
 
 // ---- Integridad del catálogo ----
 test('ids únicos y campos obligatorios', () => {
@@ -29,6 +29,46 @@ for (const intent of INTENTS) {
     test(`[${intent.id}] «${q}» -> ${expect}`, () => assert.equal(controlledReply(q, SCOPE.PHASE1).category, expect));
   }
 }
+
+// ---- Variantes adicionales (casos que hoy fallan en el backend) ----
+for (const c of EXTRA_CASES) {
+  test(`[${c.intent}] variante «${c.q}» -> ${c.expect}`, () => assert.equal(controlledReply(c.q, SCOPE.PHASE1).category, c.expect));
+}
+
+// ---- Mapa hacia el backend ----
+test('cada intención declara su mapa hacia el backend', () => {
+  for (const i of INTENTS) {
+    assert.ok(['ok', 'gap', 'unsafe'].includes(i.backend.status), i.id);
+    assert.ok(Array.isArray(i.backend.expected) && i.backend.expected.length > 0, i.id);
+    assert.ok(i.backend.today && i.backend.note, i.id);
+  }
+});
+test('los estados son por mensaje: un ejemplo que sí funciona en el backend no se marca como inseguro', () => {
+  assert.equal(backendFor('EMERGENCY', 'Tengo dolor de pecho y me falta el aire').status, 'ok');
+  assert.equal(backendFor('EMERGENCY', 'Me duele el pecho').status, 'unsafe');
+});
+test('las intenciones de emergencia y autolesión exigen emergencia=true en el backend', () => {
+  assert.equal(INTENTS.find((i) => i.id === 'EMERGENCY').backend.emergencia, true);
+  assert.equal(INTENTS.find((i) => i.id === 'SELF_HARM').backend.emergencia, true);
+});
+test('las fichas de medicamento y las peticiones de dosis prohíben "Dosis habitual" en el backend', () => {
+  for (const id of ['MED_INFO', 'DOSAGE_OR_PRESCRIPTION', 'OOS_COMMERCIAL']) assert.deepEqual(INTENTS.find((i) => i.id === id).backend.forbid, ['Dosis habitual']);
+});
+
+// ---- Casos de aceptación para el backend (JSON) ----
+test('casos de aceptación: uno por ejemplo y por variante, con ids únicos', () => {
+  const { cases } = JSON.parse(renderCases());
+  const total = INTENTS.reduce((n, i) => n + i.examples.length, 0) + EXTRA_CASES.length;
+  assert.equal(cases.length, total);
+  assert.equal(new Set(cases.map((c) => c.id)).size, cases.length);
+  for (const c of cases) {
+    assert.ok(c.query && c.intent && c.expectedBackendIntent.length > 0, c.id);
+    assert.ok(['ok', 'gap', 'unsafe'].includes(c.statusToday), c.id);
+  }
+});
+test('docs/assistant-acceptance-cases.json está al día con el catálogo', () => {
+  assert.equal(fs.readFileSync(OUT_JSON, 'utf8'), renderCases());
+});
 
 // ---- Alcance por fases ----
 test('fase 1 por defecto; phase2 solo con ASSISTANT_SCOPE=phase2', () => {
