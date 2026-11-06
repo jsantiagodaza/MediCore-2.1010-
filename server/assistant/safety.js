@@ -22,14 +22,14 @@ const RULES = {
     /perdi (el )?conocimiento|inconsciente|no reacciona|me desmaye|se desmayo/,
     /convulsi/,
     /hemorragia|sangrado (abundante|severo|fuerte|que no (para|se detiene))/,
-    /(vomito|vomitando|tos) (con )?sangre|sangre en (las )?(heces|orina)|heces negras/,
+    /(vomito|vomitando|tos) (con )?sangre|vomite sangre|escupi sangre|sangre en (las )?(heces|orina)|heces negras/,
     /(cara|labios|lengua|garganta) (hinchad|inflamad)|(hincharon|inflamaron) (la |los |mi |las )?(cara|labios|lengua|garganta)|hinchazon (de |en )?(la )?(cara|lengua|garganta|labios)|anafila/,
     /sobredosis|intoxicacion|envenen|me tome (todas|muchas|un monton)/,
     /cara caida|no puedo (mover|hablar)|habla (arrastrada|confusa)|derrame|paralisis/,
     /(bebe|recien nacido).*(fiebre|no respira|morado)/
   ],
   self_harm: [
-    /suicid|quitarme la vida|quiero morir|no quiero vivir|acabar con mi vida|hacerme dano|hacerme algo malo/
+    /suicid|quitarme la vida|quiero morir|no quiero (seguir )?viviendo|no quiero vivir|acabar con (mi vida|todo)|hacerme dano|hacerme algo malo|ganas de morir|quisiera (no existir|desaparecer)|(me )?quiero (hacer|causar)(me)? dano|mejor (estar )?muert[oa]/
   ],
   prompt_injection: [
     /ignora (todas )?(tus|las) (instrucciones|reglas)|olvida (tus|las) (instrucciones|reglas)/,
