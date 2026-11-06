@@ -15,7 +15,6 @@ const MED_ICONS_BY_CLASS = {
   'cat-derm': 'dermatologico.png'
 };
 
-// Etiquetas con emoji por categoría (las categorías reales las da el backend)
 const ETIQUETAS_CATEGORIA = {
   'Analgésico': '💊 Analgésicos',
   'Antihistamínico': '🔵 Antihistamínicos',
@@ -33,30 +32,27 @@ export default function Medicamentos() {
   const [busquedaAplicada, setBusquedaAplicada] = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState('all');
 
-  // Resultado del backend junto con los filtros que lo produjeron
   const [resultado, setResultado] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [error, setError] = useState(null);
   const [medSeleccionado, setMedSeleccionado] = useState(null);
 
-  // Retraso de 300 ms: no lanzamos una petición por cada tecla
+  // NUEVO: Estado para forzar la recarga de datos al reintentar
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
     const temporizador = setTimeout(() => setBusquedaAplicada(busqueda), 300);
     return () => clearTimeout(temporizador);
   }, [busqueda]);
 
-  // Categorías disponibles para los filtros (una sola vez)
   useEffect(() => {
     const control = new AbortController();
     fetchCategories(control.signal)
       .then(setCategorias)
-      .catch(() => {
-        /* si falla, los filtros quedan solo con "Todos" */
-      });
+      .catch(() => {});
     return () => control.abort();
   }, []);
 
-  // Catálogo: se pide al backend cada vez que cambia la búsqueda o el filtro
   useEffect(() => {
     const control = new AbortController();
 
@@ -76,10 +72,12 @@ export default function Medicamentos() {
       .catch((e) => {
         if (e.name === 'AbortError') return;
         setError(e.message);
+        // Si hay error, limpiamos el resultado para no mezclar datos viejos
+        setResultado({ items: [], busqueda: busquedaAplicada, categoria: categoriaActiva });
       });
 
     return () => control.abort();
-  }, [busquedaAplicada, categoriaActiva]);
+  }, [busquedaAplicada, categoriaActiva, retryCount]); // NUEVO: retryCount dispara la petición
 
   const items = resultado?.items ?? [];
   const cargandoInicial = resultado === null && !error;
@@ -136,11 +134,23 @@ export default function Medicamentos() {
           ))}
         </div>
 
+        {/* NUEVO: Interfaz de Error con botón de Reintentar */}
         {error && (
-          <div className="warn" style={{ marginBottom: '20px' }}>
+          <div className="warn" style={{ marginBottom: '20px', textAlign: 'center', maxWidth: '600px', margin: '20px auto' }}>
             <strong>No se pudo cargar el catálogo:</strong> {error}
             <br />
-            <small>Verifica que el backend esté corriendo en http://localhost:8080</small>
+            <small style={{ display: 'block', marginTop: '4px', marginBottom: '12px' }}>
+              Verifica que el backend esté corriendo en http://localhost:8080
+            </small>
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => {
+                setError(null);
+                setRetryCount(prev => prev + 1); // Fuerza la recarga
+              }}
+            >
+              🔄 Reintentar conexión
+            </button>
           </div>
         )}
 
@@ -159,33 +169,36 @@ export default function Medicamentos() {
             </button>
           </div>
         ) : (
-          <>
-            <p className="sub" style={{ marginBottom: '12px' }}>
-              {items.length} medicamento{items.length === 1 ? '' : 's'} encontrado
-              {items.length === 1 ? '' : 's'}
-              {actualizando ? ' · actualizando...' : ''}
-            </p>
-            <div className="med-grid">
-              {items.map((med) => {
-                const iconFile = MED_ICONS_BY_CLASS[med.categoryClass];
-                return (
-                  <button key={med.id} className="med" onClick={() => setMedSeleccionado(med)}>
-                    <div className="med-header">
-                      {iconFile ? (
-                        <img className="e" src={`${MED_ICON_PATH}${iconFile}`} alt={med.name} />
-                      ) : (
-                        <span className="e">{med.emoji}</span>
-                      )}
-                      <span className={`tag ${med.categoryClass}`}>{med.category}</span>
-                    </div>
-                    <span className="n">{med.name}</span>
-                    <span className="d">{med.dose}</span>
-                    <span className="med-view">Ver ficha clínica →</span>
-                  </button>
-                );
-              })}
-            </div>
-          </>
+          // Solo mostramos la grilla si NO hay error
+          !error && (
+            <>
+              <p className="sub" style={{ marginBottom: '12px' }}>
+                {items.length} medicamento{items.length === 1 ? '' : 's'} encontrado
+                {items.length === 1 ? '' : 's'}
+                {actualizando ? ' · actualizando...' : ''}
+              </p>
+              <div className="med-grid">
+                {items.map((med) => {
+                  const iconFile = MED_ICONS_BY_CLASS[med.categoryClass];
+                  return (
+                    <button key={med.id} className="med" onClick={() => setMedSeleccionado(med)}>
+                      <div className="med-header">
+                        {iconFile ? (
+                          <img className="e" src={`${MED_ICON_PATH}${iconFile}`} alt={med.name} />
+                        ) : (
+                          <span className="e">{med.emoji}</span>
+                        )}
+                        <span className={`tag ${med.categoryClass}`}>{med.category}</span>
+                      </div>
+                      <span className="n">{med.name}</span>
+                      <span className="d">{med.dose}</span>
+                      <span className="med-view">Ver ficha clínica →</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )
         )}
       </div>
 
