@@ -1,21 +1,37 @@
 // frontend/src/components/Header.jsx
+import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { logout as apiLogout } from '../api/auth';
+import { clearSession, getSession, subscribeSession } from '../auth/session';
 
 export default function Header() {
   const navigate = useNavigate();
-  
-  // Verificamos si hay un token guardado (simulando la sesión activa)
-  // Lo leemos directamente en el render para que se actualice al recargar
-  const isLoggedIn = !!localStorage.getItem('medicore_token');
 
-  const handleLogout = () => {
-    // Borramos los datos de sesión
-    localStorage.removeItem('medicore_token');
-    localStorage.removeItem('medicore_user');
-    // Redirigimos al inicio y recargamos para actualizar el Header
+  // Sesion actual (null si no hay). Se actualiza sola cuando cambia el login.
+  const [sesion, setSesion] = useState(() => getSession());
+  const [saliendo, setSaliendo] = useState(false);
+
+  useEffect(() => {
+    return subscribeSession(() => setSesion(getSession()));
+  }, []);
+
+  const handleLogout = async () => {
+    setSaliendo(true);
+    try {
+      if (sesion?.token) {
+        await apiLogout(sesion.token);
+      }
+    } catch {
+      // Si el token ya no es valido, igual cerramos la sesion en el navegador.
+    }
+    clearSession();
+    setSaliendo(false);
     navigate('/');
-    window.location.reload();
   };
+
+  const nombreVisible = sesion?.usuario?.name
+    || sesion?.usuario?.email?.split('@')[0]
+    || 'usuario';
 
   return (
     <header className="gnav">
@@ -24,7 +40,7 @@ export default function Header() {
           <img src="/assets/mol.png" alt="MediCore" width="28" height="28" />
           <span>MediCore</span>
         </Link>
-        
+
         <div className="links">
           <NavLink to="/" className={({ isActive }) => isActive ? 'on' : ''}>Inicio</NavLink>
           <NavLink to="/medicamentos" className={({ isActive }) => isActive ? 'on' : ''}>Medicamentos</NavLink>
@@ -33,16 +49,15 @@ export default function Header() {
           <NavLink to="/botiquin" className={({ isActive }) => isActive ? 'on' : ''}>Botiquín <span className="badge-pill">Nuevo</span></NavLink>
           <NavLink to="/preparate" className={({ isActive }) => isActive ? 'on' : ''}>Prepárate</NavLink>
         </div>
-        
+
         <div className="gnav-cta" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {isLoggedIn ? (
+          {sesion ? (
             <>
               <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--color-signal-blue)' }}>
-                {/* Mostramos la primera letra del correo */}
-                Hola, {localStorage.getItem('medicore_user')?.split('@')[0]}
+                Hola, {nombreVisible}
               </span>
-              <button onClick={handleLogout} className="btn btn-outline btn-sm">
-                Cerrar sesión
+              <button onClick={handleLogout} className="btn btn-outline btn-sm" disabled={saliendo}>
+                {saliendo ? 'Saliendo...' : 'Cerrar sesión'}
               </button>
             </>
           ) : (
