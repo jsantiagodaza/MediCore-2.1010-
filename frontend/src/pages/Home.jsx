@@ -5,6 +5,19 @@ export default function Home() {
   return (
     <section className="screen on" id="s-home">
       <div className="hero-wrapper">
+        {/* Video de fondo */}
+        <video
+          className="hero-bg-video"
+          src="/assets/fondoinicio.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        />
+        <div className="hero-bg-overlay"></div>
+
         <div className="wrap">
           <div className="hero-grid">
             {/* Left Column */}
