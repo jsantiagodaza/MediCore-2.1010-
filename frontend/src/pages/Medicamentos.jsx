@@ -1,9 +1,8 @@
 // frontend/src/pages/Medicamentos.jsx
-import { useState } from 'react';
-import { MEDS } from '../data/meds';
+import { useEffect, useState } from 'react';
 import ModalMedicamento from '../components/ModalMedicamento';
+import { fetchCategories, fetchMedicines } from '../api/medicines';
 
-// Lógica de iconos traída de tu app.js original
 const MED_ICON_PATH = '/assets/iconos-medicamentos/';
 const MED_ICONS_BY_CLASS = {
   'cat-analg': 'analgesicos.png',
@@ -16,29 +15,81 @@ const MED_ICONS_BY_CLASS = {
   'cat-derm': 'dermatologico.png'
 };
 
-const CATEGORIAS = [
-  { id: 'all', label: 'Todos' },
-  { id: 'Analgésico', label: '💊 Analgésicos' },
-  { id: 'Antihistamínico', label: '🔵 Antihistamínicos' },
-  { id: 'Antibiótico', label: '🟣 Antibióticos' },
-  { id: 'Gastroprotector', label: '🟢 Gastroprotectores' },
-  { id: 'Vitamina', label: '💛 Vitaminas' },
-  { id: 'Cardiovascular', label: '❤️ Cardiovascular' },
-  { id: 'Respiratorio', label: '🫁 Respiratorios' },
-  { id: 'Dermatológico', label: '🔴 Dermatológicos' },
-];
+const ETIQUETAS_CATEGORIA = {
+  'Analgésico': '💊 Analgésicos',
+  'Antihistamínico': '🔵 Antihistamínicos',
+  'Antibiótico': '🟣 Antibióticos',
+  'Gastroprotector': '🟢 Gastroprotectores',
+  'Vitamina': '💛 Vitaminas',
+  'Cardiovascular': '❤️ Cardiovascular',
+  'Respiratorio': '🫁 Respiratorios',
+  'Dermatológico': '🔴 Dermatológicos',
+  'Antidiabético': '🩺 Antidiabéticos'
+};
 
 export default function Medicamentos() {
   const [busqueda, setBusqueda] = useState('');
+  const [busquedaAplicada, setBusquedaAplicada] = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState('all');
-  const [medSeleccionado, setMedSeleccionado] = useState(null); // Estado para el modal
 
-  const medicamentosFiltrados = MEDS.filter((med) => {
-    const coincideBusqueda = med.n.toLowerCase().includes(busqueda.toLowerCase()) || 
-                             med.cat.toLowerCase().includes(busqueda.toLowerCase());
-    const coincideCategoria = categoriaActiva === 'all' || med.cat === categoriaActiva;
-    return coincideBusqueda && coincideCategoria;
-  });
+  const [resultado, setResultado] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [error, setError] = useState(null);
+  const [medSeleccionado, setMedSeleccionado] = useState(null);
+
+  // NUEVO: Estado para forzar la recarga de datos al reintentar
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    const temporizador = setTimeout(() => setBusquedaAplicada(busqueda), 300);
+    return () => clearTimeout(temporizador);
+  }, [busqueda]);
+
+  useEffect(() => {
+    const control = new AbortController();
+    fetchCategories(control.signal)
+      .then(setCategorias)
+      .catch(() => {});
+    return () => control.abort();
+  }, []);
+
+  useEffect(() => {
+    const control = new AbortController();
+
+    fetchMedicines({
+      search: busquedaAplicada,
+      category: categoriaActiva,
+      signal: control.signal
+    })
+      .then((items) => {
+        setResultado({
+          items,
+          busqueda: busquedaAplicada,
+          categoria: categoriaActiva
+        });
+        setError(null);
+      })
+      .catch((e) => {
+        if (e.name === 'AbortError') return;
+        setError(e.message);
+        // Si hay error, limpiamos el resultado para no mezclar datos viejos
+        setResultado({ items: [], busqueda: busquedaAplicada, categoria: categoriaActiva });
+      });
+
+    return () => control.abort();
+  }, [busquedaAplicada, categoriaActiva, retryCount]); // NUEVO: retryCount dispara la petición
+
+  const items = resultado?.items ?? [];
+  const cargandoInicial = resultado === null && !error;
+  const actualizando =
+    resultado !== null &&
+    (resultado.busqueda !== busquedaAplicada || resultado.categoria !== categoriaActiva);
+
+  const restablecer = () => {
+    setBusqueda('');
+    setBusquedaAplicada('');
+    setCategoriaActiva('all');
+  };
 
   return (
     <section className="screen on" id="s-meds" style={{ paddingTop: '120px' }}>
@@ -55,10 +106,10 @@ export default function Medicamentos() {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input 
-              className="search" 
-              type="search" 
-              placeholder="Buscar medicamento por nombre o categoría..." 
+            <input
+              className="search"
+              type="search"
+              placeholder="Buscar medicamento por nombre o categoría..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -66,55 +117,95 @@ export default function Medicamentos() {
         </div>
 
         <div className="cat-filters">
-          {CATEGORIAS.map((cat) => (
-            <button 
-              key={cat.id}
-              className={`cat-chip ${categoriaActiva === cat.id ? 'active' : ''}`}
-              onClick={() => setCategoriaActiva(cat.id)}
+          <button
+            className={`cat-chip ${categoriaActiva === 'all' ? 'active' : ''}`}
+            onClick={() => setCategoriaActiva('all')}
+          >
+            Todos
+          </button>
+          {categorias.map((cat) => (
+            <button
+              key={cat}
+              className={`cat-chip ${categoriaActiva === cat ? 'active' : ''}`}
+              onClick={() => setCategoriaActiva(cat)}
             >
-              {cat.label}
+              {ETIQUETAS_CATEGORIA[cat] ?? cat}
             </button>
           ))}
         </div>
 
-        <div className="med-grid">
-          {medicamentosFiltrados.length === 0 ? (
-            <div className="empty">
-              <img src="/assets/mol.png" alt="Mol" className="mol-empty float" />
-              <h4 style={{ fontSize: '18px', color: 'var(--color-ink-navy)', marginBottom: '6px' }}>No se encontraron resultados</h4>
-              <p>Mol no encontró medicamentos que coincidan con tu búsqueda.</p>
-              <button className="btn btn-outline btn-sm" onClick={() => { setBusqueda(''); setCategoriaActiva('all'); }}>
-                Restablecer filtros
-              </button>
-            </div>
-          ) : (
-            medicamentosFiltrados.map((med, index) => {
-              const iconFile = MED_ICONS_BY_CLASS[med.catCls];
-              return (
-                <button key={index} className="med" onClick={() => setMedSeleccionado(med)}>
-                  <div className="med-header">
-                    {iconFile ? (
-                      <img className="e" src={`${MED_ICON_PATH}${iconFile}`} alt={med.n} />
-                    ) : (
-                      <span className="e">{med.e}</span>
-                    )}
-                    <span className={`tag ${med.catCls}`}>{med.cat}</span>
-                  </div>
-                  <span className="n">{med.n}</span>
-                  <span className="d">{med.dose}</span>
-                  <span className="med-view">Ver ficha clínica →</span>
-                </button>
-              );
-            })
-          )}
-        </div>
+        {/* NUEVO: Interfaz de Error con botón de Reintentar */}
+        {error && (
+          <div className="warn" style={{ marginBottom: '20px', textAlign: 'center', maxWidth: '600px', margin: '20px auto' }}>
+            <strong>No se pudo cargar el catálogo:</strong> {error}
+            <br />
+            <small style={{ display: 'block', marginTop: '4px', marginBottom: '12px' }}>
+              Verifica que el backend esté corriendo en http://localhost:8080
+            </small>
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => {
+                setError(null);
+                setRetryCount(prev => prev + 1); // Fuerza la recarga
+              }}
+            >
+              🔄 Reintentar conexión
+            </button>
+          </div>
+        )}
+
+        {cargandoInicial ? (
+          <div className="empty">
+            <img src="/assets/mol.png" alt="Mol" className="mol-empty float" />
+            <p>Cargando catálogo...</p>
+          </div>
+        ) : items.length === 0 && !error ? (
+          <div className="empty">
+            <img src="/assets/mol.png" alt="Mol" className="mol-empty float" />
+            <h4 style={{ fontSize: '18px', color: 'var(--color-ink-navy)', marginBottom: '6px' }}>No se encontraron resultados</h4>
+            <p>Mol no encontró medicamentos que coincidan con tu búsqueda.</p>
+            <button className="btn btn-outline btn-sm" onClick={restablecer}>
+              Restablecer filtros
+            </button>
+          </div>
+        ) : (
+          // Solo mostramos la grilla si NO hay error
+          !error && (
+            <>
+              <p className="sub" style={{ marginBottom: '12px' }}>
+                {items.length} medicamento{items.length === 1 ? '' : 's'} encontrado
+                {items.length === 1 ? '' : 's'}
+                {actualizando ? ' · actualizando...' : ''}
+              </p>
+              <div className="med-grid">
+                {items.map((med) => {
+                  const iconFile = MED_ICONS_BY_CLASS[med.categoryClass];
+                  return (
+                    <button key={med.id} className="med" onClick={() => setMedSeleccionado(med)}>
+                      <div className="med-header">
+                        {iconFile ? (
+                          <img className="e" src={`${MED_ICON_PATH}${iconFile}`} alt={med.name} />
+                        ) : (
+                          <span className="e">{med.emoji}</span>
+                        )}
+                        <span className={`tag ${med.categoryClass}`}>{med.category}</span>
+                      </div>
+                      <span className="n">{med.name}</span>
+                      <span className="d">{med.dose}</span>
+                      <span className="med-view">Ver ficha clínica →</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )
+        )}
       </div>
 
-      {/* Renderizamos el Modal si hay un medicamento seleccionado */}
-      <ModalMedicamento 
-        med={medSeleccionado} 
-        iconSrc={medSeleccionado ? `${MED_ICON_PATH}${MED_ICONS_BY_CLASS[medSeleccionado.catCls]}` : null}
-        onClose={() => setMedSeleccionado(null)} 
+      <ModalMedicamento
+        med={medSeleccionado}
+        iconSrc={medSeleccionado ? `${MED_ICON_PATH}${MED_ICONS_BY_CLASS[medSeleccionado.categoryClass]}` : null}
+        onClose={() => setMedSeleccionado(null)}
       />
     </section>
   );
