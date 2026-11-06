@@ -28,6 +28,11 @@ test('no expone server/, docs/ ni .git (ni path traversal)', async () => {
   for (const p of ['/server/handler.js', '/package.json', '/.git/config', '/docs/ai-safety.md', '/..%2fpackage.json'])
     assert.equal((await fetch(base + p)).status, 404, p);
 });
+test('/assets no permite salir de su carpeta (path traversal)', async () => {
+  for (const p of ['/assets/..%2f..%2fpackage.json', '/assets/..%2f..%2fserver%2fhandler.js', '/assets/%2e%2e/%2e%2e/package.json'])
+    assert.equal((await fetch(base + p)).status, 404, p);
+});
+
 test('sirve la app con la pantalla de Mol y sus imágenes', async () => {
   const html = await (await fetch(base + '/')).text();
   assert.match(html, /id="s-asistente"/);

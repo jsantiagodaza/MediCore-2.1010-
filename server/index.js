@@ -6,6 +6,7 @@ const { handleMessage } = require('./handler');
 
 const ROOT = path.join(__dirname, '..');
 const PORT = Number(process.env.PORT) || 3000;
+const ASSET_DIRS = [path.join(ROOT, 'assets'), path.join(ROOT, 'frontend', 'public', 'assets')];
 const MAX_BODY = 10 * 1024;
 const RATE_LIMIT = { windowMs: 60_000, max: 30 };
 const hits = new Map();
@@ -61,8 +62,14 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method !== 'GET') return send(res, 405, { error: 'method_not_allowed' });
   const rel = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
-  const file = path.normalize(path.join(ROOT, rel));
-  if (!file.startsWith(ROOT + path.sep) || !STATIC_OK.test(rel)) return send(res, 404, { error: 'not_found' });
+  if (!STATIC_OK.test(rel)) return send(res, 404, { error: 'not_found' });
+  // Tras la migración a React las imágenes viven en frontend/public/assets; se mantiene assets/ como primera opción
+  const candidates = rel.startsWith('/assets/')
+    ? ASSET_DIRS.map((dir) => path.normalize(path.join(dir, rel.slice('/assets/'.length))))
+    : [path.normalize(path.join(ROOT, rel))];
+  const allowed = rel.startsWith('/assets/') ? ASSET_DIRS : [ROOT];
+  const file = candidates.find((c, i) => c.startsWith(allowed[i % allowed.length] + path.sep) && fs.existsSync(c) && fs.statSync(c).isFile());
+  if (!file) return send(res, 404, { error: 'not_found' });
   fs.readFile(file, (err, data) => {
     if (err) return send(res, 404, { error: 'not_found' });
     send(res, 200, data, { 'content-type': MIME[path.extname(file)] || 'application/octet-stream' });
