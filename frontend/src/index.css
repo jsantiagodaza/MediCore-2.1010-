@@ -254,7 +254,7 @@ a:hover {
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  text-decoration: none; /* Quita el subrayado de los enlaces */
+  text-decoration: none;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -358,7 +358,7 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: var(--radius-buttons); /* 8px */
+  border-radius: var(--radius-buttons);
   padding: 12px 24px;
   font-size: 16px;
   font-weight: var(--font-weight-semibold);
@@ -461,7 +461,7 @@ h3 {
    ========================================================================== */
 .hero-wrapper {
   position: relative;
-  background: var(--color-cloud); /* respaldo mientras carga el video */
+  background: var(--color-cloud);
   padding: 64px 0 56px;
   overflow: hidden;
 }
@@ -605,7 +605,7 @@ h3 {
   position: relative;
   z-index: 1;
   background: var(--color-paper);
-  border-radius: var(--radius-cards); /* 24px */
+  border-radius: var(--radius-cards);
   border: 1px solid var(--color-hairline);
   box-shadow: var(--shadow-sm-2);
   padding: 36px 32px 32px;
@@ -671,7 +671,7 @@ h3 {
   z-index: 2;
   text-align: left;
   background: var(--color-pebble);
-  border-radius: var(--radius-productcards); /* 16px */
+  border-radius: var(--radius-productcards);
   padding: 14px 18px;
   border: 1px solid var(--color-hairline);
   font-size: 14px;
@@ -756,7 +756,7 @@ h3 {
 
 .card {
   background: var(--color-paper);
-  border-radius: var(--radius-cards); /* 24px */
+  border-radius: var(--radius-cards);
   padding: 32px;
   border: 1px solid var(--color-hairline);
   box-shadow: var(--shadow-sm);
@@ -776,8 +776,8 @@ h3 {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  text-decoration: none; /* <--- Agrega esta línea */
-  color: inherit; /* <--- Y esta para que no se ponga azul el texto */
+  text-decoration: none;
+  color: inherit;
 }
 
 .feat::before {
@@ -813,6 +813,13 @@ h3 {
   font-size: 24px;
   margin-bottom: 6px;
   transition: transform 0.2s ease, background 0.2s ease;
+  padding: 4px;
+}
+
+.feat-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .feat:hover .feat-icon-badge {
@@ -884,7 +891,7 @@ h3 {
 .search {
   width: 100%;
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-inputs); /* 8px */
+  border-radius: var(--radius-inputs);
   background: var(--color-paper);
   padding: 14px 20px 14px 48px;
   outline: none;
@@ -922,13 +929,24 @@ h3 {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-badges); /* 9999px */
+  border-radius: var(--radius-badges);
   background: var(--color-paper);
   color: var(--color-ink-navy);
   border: 1px solid var(--color-hairline);
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(71, 103, 136, 0.04);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tamaño controlado para los iconos de los filtros */
+.cat-chip-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .cat-chip:hover {
@@ -956,7 +974,7 @@ h3 {
   position: relative;
   overflow: hidden;
   background: var(--color-paper);
-  border-radius: var(--radius-productcards); /* 16px */
+  border-radius: var(--radius-productcards);
   border: 1px solid var(--color-hairline);
   padding: 24px;
   text-align: left;
@@ -1031,7 +1049,7 @@ h3 {
   font-size: 12px;
   font-weight: var(--font-weight-semibold);
   padding: 4px 10px;
-  border-radius: var(--radius-badges); /* 9999px */
+  border-radius: var(--radius-badges);
   letter-spacing: -0.1px;
 }
 
@@ -1043,6 +1061,9 @@ h3 {
 .cat-card  { background: #ffe4e6; color: #9f1239; }
 .cat-resp  { background: #e0f2fe; color: #075985; }
 .cat-derm  { background: #ffedd5; color: #9a3412; }
+
+/* NUEVA ETIQUETA PARA ANTIDIABÉTICOS (GRIS OSCURO) */
+.cat-diab  { background: #e2e8f0; color: #334155; }
 
 /* Empty search state */
 .empty {
@@ -1094,7 +1115,7 @@ h3 {
 
 .form input {
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-inputs); /* 8px */
+  border-radius: var(--radius-inputs);
   background: var(--color-pebble);
   padding: 13px 16px;
   outline: none;
@@ -1230,7 +1251,7 @@ h3 {
   text-align: left;
   background: var(--color-paper);
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-inputs); /* 8px */
+  border-radius: var(--radius-inputs);
   padding: 14px 16px;
   font-size: 14px;
   font-weight: var(--font-weight-medium);
@@ -1367,7 +1388,7 @@ h3 {
   font-size: 13px;
   font-weight: var(--font-weight-medium);
   padding: 6px 14px;
-  border-radius: var(--radius-badges); /* 9999px */
+  border-radius: var(--radius-badges);
   background: var(--color-pebble);
   color: var(--color-ink-navy);
   border: 1px solid var(--color-hairline);
@@ -1446,7 +1467,7 @@ h3 {
 .sheet {
   position: relative;
   background: var(--color-paper);
-  border-radius: var(--radius-cards); /* 24px */
+  border-radius: var(--radius-cards);
   border: 1px solid var(--color-hairline);
   padding: 36px 36px 32px;
   width: min(580px, 100%);
@@ -1975,7 +1996,7 @@ h3 {
   display: grid;
   grid-template-columns: 210px 1fr;
   align-items: stretch;
-  overflow: hidden; /* Clipa perfectamente con la esquina redondeada de la tarjeta */
+  overflow: hidden;
 }
 
 .kit-progress-corner-img-wrap {
