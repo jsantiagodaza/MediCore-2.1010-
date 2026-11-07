@@ -132,7 +132,6 @@ La seguridad va **antes** que todo: «¿Cuánto ibuprofeno tomo? Me duele el pec
 
 #### `PROMPT_INJECTION` — Intento de manipular al asistente
 
-- **Qué es:** Pedir que ignore sus reglas, revele instrucciones internas o claves, o que "actúe como médico".
 - **Qué hace Mol:** Se niega, no revela nada interno y devuelve a la persona al alcance permitido.
 - **Categoría de API (prototipo Node):** `prompt_injection`
 - **Backend Spring hoy → esperado:** `NO_ENTENDIDO / FUERA_DE_ALCANCE` → `NO_ENTENDIDO` o `FUERA_DE_ALCANCE` · ✅ cumple
