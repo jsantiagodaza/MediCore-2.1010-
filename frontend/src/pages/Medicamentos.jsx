@@ -12,19 +12,32 @@ const MED_ICONS_BY_CLASS = {
   'cat-vita': 'vitaminas.png',
   'cat-card': 'cardiaco.png',
   'cat-resp': 'respiratorio.png',
-  'cat-derm': 'dermatologico.png'
+  'cat-derm': 'dermatologico.png',
+  'cat-diab': 'antidiabeticos.png' // <-- NUEVO ICONO AGREGADO
 };
 
 const ETIQUETAS_CATEGORIA = {
-  'Analgésico': '💊 Analgésicos',
-  'Antihistamínico': '🔵 Antihistamínicos',
-  'Antibiótico': '🟣 Antibióticos',
-  'Gastroprotector': '🟢 Gastroprotectores',
-  'Vitamina': '💛 Vitaminas',
-  'Cardiovascular': '❤️ Cardiovascular',
-  'Respiratorio': '🫁 Respiratorios',
-  'Dermatológico': '🔴 Dermatológicos',
-  'Antidiabético': '🩺 Antidiabéticos'
+  'Analgésico': 'Analgésicos',
+  'Antihistamínico': 'Antihistamínicos',
+  'Antibiótico': 'Antibióticos',
+  'Gastroprotector': 'Gastroprotectores',
+  'Vitamina': 'Vitaminas',
+  'Cardiovascular': 'Cardiovascular',
+  'Respiratorio': 'Respiratorios',
+  'Dermatológico': 'Dermatológicos',
+  'Antidiabético': 'Antidiabéticos'
+};
+
+const ICONOS_FILTRO = {
+  'Analgésico': 'analgesicos.png',
+  'Antihistamínico': 'antihistaminico.png',
+  'Antibiótico': 'antibiotico.png',
+  'Gastroprotector': 'gastroprotector.png',
+  'Vitamina': 'vitaminas.png',
+  'Cardiovascular': 'cardiaco.png',
+  'Respiratorio': 'respiratorio.png',
+  'Dermatológico': 'dermatologico.png',
+  'Antidiabético': 'antidiabeticos.png'
 };
 
 export default function Medicamentos() {
@@ -37,7 +50,6 @@ export default function Medicamentos() {
   const [error, setError] = useState(null);
   const [medSeleccionado, setMedSeleccionado] = useState(null);
 
-  // NUEVO: Estado para forzar la recarga de datos al reintentar
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
@@ -72,12 +84,11 @@ export default function Medicamentos() {
       .catch((e) => {
         if (e.name === 'AbortError') return;
         setError(e.message);
-        // Si hay error, limpiamos el resultado para no mezclar datos viejos
         setResultado({ items: [], busqueda: busquedaAplicada, categoria: categoriaActiva });
       });
 
     return () => control.abort();
-  }, [busquedaAplicada, categoriaActiva, retryCount]); // NUEVO: retryCount dispara la petición
+  }, [busquedaAplicada, categoriaActiva, retryCount]);
 
   const items = resultado?.items ?? [];
   const cargandoInicial = resultado === null && !error;
@@ -123,18 +134,30 @@ export default function Medicamentos() {
           >
             Todos
           </button>
-          {categorias.map((cat) => (
-            <button
-              key={cat}
-              className={`cat-chip ${categoriaActiva === cat ? 'active' : ''}`}
-              onClick={() => setCategoriaActiva(cat)}
-            >
-              {ETIQUETAS_CATEGORIA[cat] ?? cat}
-            </button>
-          ))}
+          
+          {categorias.map((cat) => {
+            const iconoArchivo = ICONOS_FILTRO[cat];
+            const texto = ETIQUETAS_CATEGORIA[cat] ?? cat;
+
+            return (
+              <button
+                key={cat}
+                className={`cat-chip ${categoriaActiva === cat ? 'active' : ''}`}
+                onClick={() => setCategoriaActiva(cat)}
+              >
+                {iconoArchivo && (
+                  <img 
+                    src={`${MED_ICON_PATH}${iconoArchivo}`} 
+                    alt="" 
+                    className="cat-chip-img" 
+                  />
+                )}
+                {texto}
+              </button>
+            );
+          })}
         </div>
 
-        {/* NUEVO: Interfaz de Error con botón de Reintentar */}
         {error && (
           <div className="warn" style={{ marginBottom: '20px', textAlign: 'center', maxWidth: '600px', margin: '20px auto' }}>
             <strong>No se pudo cargar el catálogo:</strong> {error}
@@ -146,7 +169,7 @@ export default function Medicamentos() {
               className="btn btn-primary btn-sm" 
               onClick={() => {
                 setError(null);
-                setRetryCount(prev => prev + 1); // Fuerza la recarga
+                setRetryCount(prev => prev + 1);
               }}
             >
               🔄 Reintentar conexión
@@ -169,7 +192,6 @@ export default function Medicamentos() {
             </button>
           </div>
         ) : (
-          // Solo mostramos la grilla si NO hay error
           !error && (
             <>
               <p className="sub" style={{ marginBottom: '12px' }}>
@@ -179,7 +201,11 @@ export default function Medicamentos() {
               </p>
               <div className="med-grid">
                 {items.map((med) => {
-                  const iconFile = MED_ICONS_BY_CLASS[med.categoryClass];
+                  // NUEVA LÓGICA: Forzamos la clase y el icono si es Antidiabético
+                  const isDiabetic = med.category === 'Antidiabético';
+                  const catClass = isDiabetic ? 'cat-diab' : med.categoryClass;
+                  const iconFile = MED_ICONS_BY_CLASS[catClass];
+
                   return (
                     <button key={med.id} className="med" onClick={() => setMedSeleccionado(med)}>
                       <div className="med-header">
@@ -188,7 +214,7 @@ export default function Medicamentos() {
                         ) : (
                           <span className="e">{med.emoji}</span>
                         )}
-                        <span className={`tag ${med.categoryClass}`}>{med.category}</span>
+                        <span className={`tag ${catClass}`}>{med.category}</span>
                       </div>
                       <span className="n">{med.name}</span>
                       <span className="d">{med.dose}</span>
@@ -204,7 +230,7 @@ export default function Medicamentos() {
 
       <ModalMedicamento
         med={medSeleccionado}
-        iconSrc={medSeleccionado ? `${MED_ICON_PATH}${MED_ICONS_BY_CLASS[medSeleccionado.categoryClass]}` : null}
+        iconSrc={medSeleccionado ? `${MED_ICON_PATH}${MED_ICONS_BY_CLASS[medSeleccionado.category === 'Antidiabético' ? 'cat-diab' : medSeleccionado.categoryClass]}` : null}
         onClose={() => setMedSeleccionado(null)}
       />
     </section>

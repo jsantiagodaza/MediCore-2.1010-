@@ -100,30 +100,43 @@ export default function Home() {
             <p className="lead">Herramientas simples y directas diseñadas para darte tranquilidad y respuestas médicas confiables.</p>
           </div>
           <div className="grid3">
+            
             <Link to="/medicamentos" className="card feat">
-              <div className="feat-icon-badge">💊</div>
+              <div className="feat-icon-badge">
+                <img src="/assets/medicamentos.png" alt="Medicamentos" className="feat-icon-img" />
+              </div>
               <h3>Medicamentos</h3>
               <p>Para qué sirven, dosis recomendadas, cuándo tomarlos y precauciones esenciales de seguridad.</p>
               <span className="link">Explorar catálogo ›</span>
             </Link>
+
             <Link to="/cuida" className="card feat">
-              <div className="feat-icon-badge">⚖️💧</div>
+              <div className="feat-icon-badge">
+                <img src="/assets/cuidate-imc-agua.png" alt="Cuídate" className="feat-icon-img" />
+              </div>
               <h3>Cuídate (IMC y Agua)</h3>
               <p>Calcula tu índice de masa corporal y tu ingesta diaria de agua personalizada según tu clima y actividad con Mol.</p>
               <span className="link">Calcular IMC y Agua ›</span>
             </Link>
+
             <Link to="/mal" className="card feat">
-              <div className="feat-icon-badge">🩺</div>
+              <div className="feat-icon-badge">
+                <img src="/assets/me-siento-mal.png" alt="Me siento mal" className="feat-icon-img" />
+              </div>
               <h3>Me siento mal</h3>
               <p>Selecciona tus síntomas para recibir orientación guiada, causas probables y pautas seguras.</p>
               <span className="link">Evaluar mis síntomas ›</span>
             </Link>
+
             <Link to="/botiquin" className="card feat">
-              <div className="feat-icon-badge">🎒</div>
+              <div className="feat-icon-badge">
+                <img src="/assets/botiquin-icono.png" alt="Botiquín" className="feat-icon-img" />
+              </div>
               <h3>Botiquín Esencial <span className="badge-pill" style={{ fontSize: '11px' }}>Nuevo</span></h3>
               <p>Guías para armar, organizar y revisar botiquines seguros según tu actividad con Mol Paramédico.</p>
               <span className="link">Preparar mi botiquín ›</span>
             </Link>
+
           </div>
         </div>
       </div>
