@@ -973,7 +973,7 @@ h3 {
 .med {
   position: relative;
   overflow: hidden;
-  background: var(--color-paper);
+  background: var(--color-paper); /* Aseguramos que el fondo sea siempre blanco */
   border-radius: var(--radius-productcards);
   border: 1px solid var(--color-hairline);
   padding: 24px;
@@ -982,13 +982,39 @@ h3 {
   flex-direction: column;
   gap: 12px;
   box-shadow: var(--shadow-sm);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
   cursor: pointer;
+  z-index: 1;
+}
+
+/* Efecto de borde progresivo */
+.med::before {
+  content: '';
+  position: absolute;
+  inset: -1px; /* Se superpone al borde original */
+  border-radius: inherit;
+  padding: 4px; /* Grosor del borde animado */
+  background: linear-gradient(90deg, var(--cat-color, var(--color-signal-blue)), transparent 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: background-position 0.4s ease, opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Al pasar el ratón o hacer focus (teclado), el borde se "llena" */
+.med:hover::before,
+.med:focus-visible::before {
+  opacity: 1;
+  background-position: 0 0;
 }
 
 .med:hover {
   transform: translateY(-4px);
-  border-color: var(--color-mist-gray);
   box-shadow: var(--shadow-sm-2);
 }
 
@@ -997,6 +1023,8 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  position: relative;
+  z-index: 3; /* Asegura que el contenido esté sobre el borde animado */
 }
 
 .med .e {
@@ -1022,12 +1050,16 @@ h3 {
   font-size: 18px;
   line-height: 1.3;
   color: var(--color-ink-navy);
+  position: relative;
+  z-index: 3;
 }
 
 .med .d {
   color: var(--color-slate-gray);
   font-size: 14px;
   font-weight: var(--font-weight-medium);
+  position: relative;
+  z-index: 3;
 }
 
 .med-view {
@@ -1040,9 +1072,11 @@ h3 {
   display: flex;
   align-items: center;
   gap: 4px;
+  position: relative;
+  z-index: 3;
 }
 
-/* Category Pill Badges */
+/* Category Pill Badges y Variables de Color */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -1053,17 +1087,39 @@ h3 {
   letter-spacing: -0.1px;
 }
 
-.cat-analg { background: #fee2e2; color: #991b1b; }
-.cat-antih { background: #e0e7ff; color: #3730a3; }
-.cat-antib { background: #f3e8ff; color: #6b21a8; }
-.cat-gast  { background: #dcfce7; color: #166534; }
-.cat-vita  { background: #fef3c7; color: #92400e; }
-.cat-card  { background: #ffe4e6; color: #9f1239; }
-.cat-resp  { background: #e0f2fe; color: #075985; }
-.cat-derm  { background: #ffedd5; color: #9a3412; }
+/* 1. Variables de color SOLO para el borde de la tarjeta */
+.cat-analg { --cat-color: #ef4444; }
+.cat-antih { --cat-color: #6366f1; }
+.cat-antib { --cat-color: #a855f7; }
+.cat-gast  { --cat-color: #22c55e; }
+.cat-vita  { --cat-color: #f59e0b; }
+.cat-card  { --cat-color: #f43f5e; }
+.cat-resp  { --cat-color: #0ea5e9; }
+.cat-derm  { --cat-color: #f97316; }
+.cat-diab  { --cat-color: #64748b; }
 
-/* NUEVA ETIQUETA PARA ANTIDIABÉTICOS (GRIS OSCURO) */
-.cat-diab  { background: #e2e8f0; color: #334155; }
+/* 2. Colores de fondo SOLO para las etiquetas (badges) */
+.tag.cat-analg { background: #fee2e2; color: #991b1b; }
+.tag.cat-antih { background: #e0e7ff; color: #3730a3; }
+.tag.cat-antib { background: #f3e8ff; color: #6b21a8; }
+.tag.cat-gast  { background: #dcfce7; color: #166534; }
+.tag.cat-vita  { background: #fef3c7; color: #92400e; }
+.tag.cat-card  { background: #ffe4e6; color: #9f1239; }
+.tag.cat-resp  { background: #e0f2fe; color: #075985; }
+.tag.cat-derm  { background: #ffedd5; color: #9a3412; }
+.tag.cat-diab  { background: #e2e8f0; color: #334155; }
+
+/* Accesibilidad: Respetar la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .med::before {
+    transition: opacity 0.1s ease;
+    background: var(--cat-color);
+    background-size: 100% 100%;
+  }
+  .med:hover {
+    transform: none;
+  }
+}
 
 /* Empty search state */
 .empty {
@@ -3447,5 +3503,70 @@ h3 {
 
   .orina-section-card {
     padding: 24px 18px;
+  }
+}
+/* ==========================================================================
+   REDISEÑO LOGIN (SPLIT SCREEN)
+   ========================================================================== */
+.login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-paper);
+  padding: 40px 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-right {
+  flex: 1;
+  position: relative;
+  display: none; /* Oculto en móvil por defecto */
+  align-items: flex-end;
+  padding: 60px;
+  overflow: hidden;
+  background: var(--color-ink-navy);
+}
+
+.login-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.login-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(11, 53, 88, 0.8) 0%, rgba(0, 107, 255, 0.4) 100%);
+  z-index: 1;
+}
+
+.login-right-content {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  animation: fadeIn 1s ease;
+}
+
+/* Mostrar la columna derecha en pantallas medianas y grandes */
+@media (min-width: 900px) {
+  .login-right {
+    display: flex;
+  }
+}
+
+/* Respetar la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .login-bg-video {
+    display: none;
   }
 }
