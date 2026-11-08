@@ -3505,3 +3505,68 @@ h3 {
     padding: 24px 18px;
   }
 }
+/* ==========================================================================
+   REDISEÑO LOGIN (SPLIT SCREEN)
+   ========================================================================== */
+.login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-paper);
+  padding: 40px 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-right {
+  flex: 1;
+  position: relative;
+  display: none; /* Oculto en móvil por defecto */
+  align-items: flex-end;
+  padding: 60px;
+  overflow: hidden;
+  background: var(--color-ink-navy);
+}
+
+.login-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.login-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(11, 53, 88, 0.8) 0%, rgba(0, 107, 255, 0.4) 100%);
+  z-index: 1;
+}
+
+.login-right-content {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  animation: fadeIn 1s ease;
+}
+
+/* Mostrar la columna derecha en pantallas medianas y grandes */
+@media (min-width: 900px) {
+  .login-right {
+    display: flex;
+  }
+}
+
+/* Respetar la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .login-bg-video {
+    display: none;
+  }
+}
