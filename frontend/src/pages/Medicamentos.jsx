@@ -13,7 +13,7 @@ const MED_ICONS_BY_CLASS = {
   'cat-card': 'cardiaco.png',
   'cat-resp': 'respiratorio.png',
   'cat-derm': 'dermatologico.png',
-  'cat-diab': 'antidiabeticos.png' // <-- NUEVO ICONO AGREGADO
+  'cat-diab': 'antidiabeticos.png'
 };
 
 const ETIQUETAS_CATEGORIA = {
@@ -201,13 +201,12 @@ export default function Medicamentos() {
               </p>
               <div className="med-grid">
                 {items.map((med) => {
-                  // NUEVA LÓGICA: Forzamos la clase y el icono si es Antidiabético
                   const isDiabetic = med.category === 'Antidiabético';
                   const catClass = isDiabetic ? 'cat-diab' : med.categoryClass;
                   const iconFile = MED_ICONS_BY_CLASS[catClass];
 
                   return (
-                    <button key={med.id} className="med" onClick={() => setMedSeleccionado(med)}>
+                    <button key={med.id} className={`med ${catClass}`} onClick={() => setMedSeleccionado(med)}>
                       <div className="med-header">
                         {iconFile ? (
                           <img className="e" src={`${MED_ICON_PATH}${iconFile}`} alt={med.name} />
