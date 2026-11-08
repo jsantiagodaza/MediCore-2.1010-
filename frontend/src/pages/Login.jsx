@@ -7,7 +7,6 @@ import { saveSession } from '../auth/session';
 export default function Login() {
   const navigate = useNavigate();
 
-  // 'login' para iniciar sesion, 'registro' para crear cuenta
   const [modo, setModo] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +25,6 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    // Validaciones basicas en el navegador (el backend las repite)
     if (!email.trim() || !password) {
       setError('Por favor, completa todos los campos.');
       return;
@@ -50,10 +48,10 @@ export default function Login() {
         });
       }
 
-      // Si el registro salio bien, iniciamos sesion automaticamente
       const sesion = await apiLogin(email.trim(), password);
       saveSession(sesion);
       navigate('/');
+      window.location.reload(); // Recarga para actualizar el Header
     } catch (err) {
       setError(err.message ?? 'No se pudo completar la operación.');
     } finally {
@@ -62,104 +60,136 @@ export default function Login() {
   };
 
   return (
-    <section className="screen on" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <div className="card" style={{ maxWidth: '420px', width: '100%', padding: '40px 32px' }}>
-
-        <div className="center" style={{ marginBottom: '24px' }}>
-          <img src="/assets/mol.png" alt="Mol" style={{ width: '80px', height: '80px', marginBottom: '16px' }} className="float" />
-          <h2 style={{ fontSize: '28px' }}>{esRegistro ? 'Crea tu cuenta' : 'Bienvenido de nuevo'}</h2>
-          <p style={{ color: 'var(--color-slate-gray)', fontSize: '14px' }}>
-            {esRegistro
-              ? 'Regístrate para guardar tu historial y acceder a herramientas personalizadas.'
-              : 'Inicia sesión para guardar tu historial y acceder a herramientas personalizadas.'}
-          </p>
-        </div>
-
-        {/* Alertas del backend: credenciales inválidas, email ya registrado, etc. */}
-        {error && (
-          <div className="warn" style={{ marginBottom: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span>⚠️</span> {error}
+    <section className="screen on" style={{ padding: 0, minHeight: '100vh', display: 'flex' }}>
+      
+      {/* LADO IZQUIERDO: Formulario */}
+      <div className="login-left">
+        <div className="login-form-wrapper">
+          
+          <div className="center" style={{ marginBottom: '32px' }}>
+            <img src="/assets/mol-verde.png" alt="Mol" style={{ width: '75px', height: '85px', marginBottom: '16px' }} className="float" />
+            <h2 style={{ fontSize: '32px', marginBottom: '8px' }}>
+              {esRegistro ? 'Crea tu cuenta' : 'Bienvenido de nuevo'}
+            </h2>
+            <p style={{ color: 'var(--color-slate-gray)', fontSize: '15px' }}>
+              {esRegistro
+                ? 'Regístrate para guardar tu historial y acceder a herramientas personalizadas.'
+                : 'Inicia sesión para guardar tu historial y acceder a herramientas personalizadas.'}
+            </p>
           </div>
-        )}
 
-        <form className="form" onSubmit={handleSubmit}>
-          {esRegistro && (
+          {error && (
+            <div className="warn" style={{ marginBottom: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <span>⚠️</span> {error}
+            </div>
+          )}
+
+          <form className="form" onSubmit={handleSubmit}>
+            {esRegistro && (
+              <label>
+                Nombre (Completo)
+                <input
+                  type="text"
+                  placeholder="ej. Jainer Enrique Cuello Castilla"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  disabled={cargando}
+                  autoComplete="name"
+                />
+              </label>
+            )}
+
             <label>
-              Nombre (opcional)
+              Correo electrónico
               <input
-                type="text"
-                placeholder="ej. Jainer"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
+                type="email"
+                placeholder="ej. jainer@medicore.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={cargando}
-                autoComplete="name"
+                autoComplete="email"
               />
             </label>
-          )}
 
-          <label>
-            Correo electrónico
-            <input
-              type="email"
-              placeholder="ej. jainer@medicore.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+            <label>
+              Contraseña
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={cargando}
+                autoComplete={esRegistro ? 'new-password' : 'current-password'}
+              />
+            </label>
+
+            {esRegistro && (
+              <small style={{ color: 'var(--color-slate-gray)', fontSize: '12px', marginTop: '-10px' }}>
+                Mínimo 8 caracteres.
+              </small>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary full"
               disabled={cargando}
-              autoComplete="email"
-            />
-          </label>
+              style={{ marginTop: '10px', opacity: cargando ? 0.7 : 1, height: '48px' }}
+            >
+              {cargando
+                ? (esRegistro ? 'Creando cuenta...' : 'Iniciando sesión...')
+                : (esRegistro ? 'Crear cuenta' : 'Iniciar sesión')}
+            </button>
+          </form>
 
-          <label>
-            Contraseña
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={cargando}
-              autoComplete={esRegistro ? 'new-password' : 'current-password'}
-            />
-          </label>
+          <div className="center" style={{ marginTop: '24px', fontSize: '14px', color: 'var(--color-slate-gray)' }}>
+            {esRegistro ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? '}
+            <button
+              type="button"
+              onClick={() => cambiarModo(esRegistro ? 'login' : 'registro')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-signal-blue)',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                padding: 0,
+                fontSize: '14px',
+                fontFamily: 'inherit'
+              }}
+            >
+              {esRegistro ? 'Inicia sesión' : 'Regístrate aquí'}
+            </button>
+          </div>
 
-          {esRegistro && (
-            <small style={{ color: 'var(--color-slate-gray)', fontSize: '12px' }}>
-              Mínimo 8 caracteres.
-            </small>
-          )}
-
-          <button
-            type="submit"
-            className="btn btn-primary full"
-            disabled={cargando}
-            style={{ marginTop: '10px', opacity: cargando ? 0.7 : 1 }}
-          >
-            {cargando
-              ? (esRegistro ? 'Creando cuenta...' : 'Iniciando sesión...')
-              : (esRegistro ? 'Crear cuenta' : 'Iniciar sesión')}
-          </button>
-        </form>
-
-        <div className="center" style={{ marginTop: '24px', fontSize: '14px', color: 'var(--color-slate-gray)' }}>
-          {esRegistro ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? '}
-          <button
-            type="button"
-            onClick={() => cambiarModo(esRegistro ? 'login' : 'registro')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--color-signal-blue)',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              padding: 0,
-              fontSize: '14px',
-              fontFamily: 'inherit'
-            }}
-          >
-            {esRegistro ? 'Inicia sesión' : 'Regístrate aquí'}
-          </button>
         </div>
-
       </div>
+
+      {/* LADO DERECHO: Visual / Video */}
+      <div className="login-right">
+        <video
+          className="login-bg-video"
+          src="/assets/fondoinicio3.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="login-bg-overlay"></div>
+        
+        <div className="login-right-content">
+          <span className="kicker" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <span className="kicker-dot" style={{ background: 'white' }}></span>
+            MediCore 2.0
+          </span>
+          <h2 style={{ color: 'white', fontSize: 'clamp(32px, 4vw, 48px)', marginBottom: '16px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
+            Tu salud, simple y segura.
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '18px', maxWidth: '400px', lineHeight: '1.5' }}>
+            Accede a tu historial de medicamentos, calculadoras de salud y herramientas personalizadas con la compañía de Mol.
+          </p>
+        </div>
+      </div>
+
     </section>
   );
 }
