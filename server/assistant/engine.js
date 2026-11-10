@@ -1,7 +1,8 @@
 'use strict';
-const { classifySafety, normalize } = require('./safety');
+const { classifySafety, normalize, hasStopVerb } = require('./safety');
 const { loadCatalog, findMedication, findSymptoms, isPrescriptionOnly, SOURCES } = require('./knowledge');
 const { isActive, scopeFromEnv, SCOPE } = require('./intents');
+const { interactionAnswer, needsProfessionalOnly } = require('./interactions');
 
 const catalog = loadCatalog();
 
@@ -44,6 +45,15 @@ function injection() {
     'blocked',
     'No puedo cambiar mis reglas de seguridad ni compartir información interna. Sí puedo darte información general sobre medicamentos del catálogo, hidratación o botiquín. ¿Sobre qué te gustaría saber?',
     { flags: ['prompt_injection'] }
+  );
+}
+
+function treatmentChange() {
+  return build(
+    'treatment_change_refused',
+    'refused',
+    'No puedo recomendarte iniciar, suspender, cambiar ni ajustar un tratamiento: eso depende de tu caso y lo debe decidir tu médico o farmacéutico. Dejar un medicamento por tu cuenta puede ser riesgoso: la enfermedad puede volver o empeorar, y algunos tratamientos (por ejemplo antibióticos o medicamentos para la presión, el azúcar o el ánimo) no deben interrumpirse sin indicación. Si tienes molestias, efectos adversos o dudas, comunícate con quien te lo recetó. Si notas algo grave (dificultad para respirar, hinchazón de cara o labios, sangrado, confusión), acude a urgencias o llama al 123. Esto es orientación general, no un consejo clínico personalizado.',
+    { flags: ['treatment_change_request'], sources: S('minsalud', 'medline'), actions: ['Consultar al médico que te lo recetó', 'Consultar a un farmacéutico'] }
   );
 }
 
@@ -91,7 +101,7 @@ function prescription(message) {
 }
 
 function medicationInfo(m) {
-  return build('medication_info', 'ok', medSummary(m), {
+  return build('medication_info', 'ok', `${medSummary(m)}\nEs información general del catálogo de MediCore (prototipo, sin revisión clínica): puede estar incompleta. Confírmala siempre en el prospecto o con un farmacéutico.`, {
     sources: S('catalog', 'medline'),
     actions: ['Consultar a un farmacéutico o médico antes de usarlo']
   });
@@ -109,7 +119,7 @@ function comingSoon(intentId, topic, section) {
 function generalTopics(message, scope) {
   const t = normalize(message);
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey)\b/.test(t))
-    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto.');
+    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo (para qué sirven, cuándo se usan y sus precauciones) y orientarte sobre posibles interacciones entre dos medicamentos. No diagnostico ni receto.');
   if (/agua|hidrat/.test(t)) {
     if (!isActive('HYDRATION', scope)) return comingSoon('HYDRATION', 'La orientación sobre hidratación', 'Cuídate → Agua');
     return build('hydration', 'ok', 'Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.', { sources: S('oms'), actions: ['Abrir la calculadora de hidratación'] });
@@ -160,10 +170,17 @@ function controlledReply(message, scope = SCOPE.PHASE1) {
     case 'self_harm': return selfHarm();
     case 'prompt_injection': return injection();
     case 'diagnosis': return diagnosis(message);
+    case 'treatment_change': return treatmentChange();
     case 'prescription': return prescription(message);
   }
+  // Interacciones entre medicamentos (issue #64): siempre determinista, nunca delegada a IA
+  if (needsProfessionalOnly(normalize(message))) return prescription(message);
+  const inter = interactionAnswer(message, catalog.meds);
+  if (inter) return build(inter.category, inter.level, inter.reply, { flags: inter.flags, sources: S(...inter.sources), actions: inter.actions });
   const norm = normalize(message);
   const med = findMedication(message, catalog.meds);
+  // «Quiero dejar la metformina»: verbo de suspensión + medicamento del catálogo (issue #65)
+  if (med && hasStopVerb(message)) return treatmentChange();
   if (med) return COMMERCIAL.test(norm) ? commercial() : medicationInfo(med);
   const topic = generalTopics(message, scope);
   if (topic) return topic;

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,17 +15,26 @@ import com.medicore.api.models.Medicine;
 import com.medicore.api.utils.TextNormalizer;
 
 /**
- * Motor de respuestas del asistente (Mol).
+ * Motor de respuestas predeterminadas del asistente (Mol).
  *
- * Version inicial por reglas, sin modelos externos:
- *  1. Detecta posibles urgencias y responde con prioridad a la seguridad.
- *  2. Saludos.
- *  3. Preguntas sobre un medicamento del catalogo (consulta la base de datos).
- *  4. Solicitudes de diagnostico o receta: no se responden.
- *  5. Mensajes con sintomas: orientacion general.
+ * Funciona por reglas, sin modelos externos: el mismo mensaje da siempre la
+ * misma respuesta. El texto se normaliza (minusculas, sin tildes) y se evalua
+ * en este orden, deteniendose en la primera coincidencia:
+ *
+ *  1. Seguridad: emergencia, autolesion, manipulacion del asistente, pedido de
+ *     diagnostico y pedido de dosis o receta. Va antes que todo lo demas.
+ *  2. Medicamento del catalogo (por nombre o marca). Si pregunta por precio o
+ *     compra se declina; si no, se responde con la ficha SIN dosis.
+ *  3. Saludo.
+ *  4. Sintomas: no se orienta (fuera de la fase 1), se redirige a "Me siento mal".
+ *  5. Parece una pregunta por un medicamento que no esta en el catalogo.
  *  6. Cualquier otra cosa: respuesta de "no entendi".
  *
- * TODO (#30 / #31): ampliar intenciones, afinar fallbacks y limites de seguridad.
+ * Las reglas de texto viven en {@link AssistantRules}. El comportamiento de
+ * referencia y los casos de prueba estan en docs/assistant-intents.md y
+ * docs/assistant-acceptance-cases.json.
+ *
+ * TODO (#31): afinar fallbacks y mensajes.
  * TODO (#33): permitir un proveedor externo de IA manteniendo estas reglas como respaldo.
  */
 @Service
@@ -34,26 +44,11 @@ public class AssistantService {
     private static final String AVISO_MEDICO =
             "Recuerda: soy una guia informativa, no reemplazo a un medico.";
 
-    private static final List<String> CLAVES_EMERGENCIA = List.of(
-            "dolor de pecho", "dolor en el pecho", "dolor en el brazo izquierdo",
-            "no puedo respirar", "dificultad para respirar", "me falta el aire",
-            "desmay", "convuls", "sangrado abundante", "sangre abundante",
-            "suicid", "sobredosis", "inconsciente", "no responde", "paro cardiaco",
-            "derrame cerebral", "cara torcida");
+    /** Una precaucion con cifras suele ser un limite de dosis o duracion: Mol no las da. */
+    private static final Pattern TIENE_CIFRAS = Pattern.compile("\\d");
 
-    private static final List<String> CLAVES_SALUDO = List.of(
-            "hola", "buenas", "buenos dias", "buenas tardes", "buenas noches",
-            "hey", "que tal", "como estas");
-
-    private static final List<String> CLAVES_DIAGNOSTICO = List.of(
-            "diagnostic", "que tengo", "que enfermedad", "que me pasa",
-            "receta", "recetame", "prescri", "recipe",
-            "que medicamento tomo", "cual medicamento tomo");
-
-    private static final List<String> CLAVES_SINTOMAS = List.of(
-            "dolor", "duele", "punzada", "ardor", "malestar", "fiebre", "tos",
-            "nausea", "vomito", "diarrea", "mareo", "congestion", "escalofrio",
-            "sangrado", "picazon", "alergia", "cansancio");
+    private static final Pattern REQUIERE_RECETA =
+            Pattern.compile("prescrip|receta", Pattern.CASE_INSENSITIVE);
 
     private final MedicineService medicineService;
 
@@ -68,62 +63,127 @@ public class AssistantService {
      * @return respuesta estructurada; nunca lanza excepcion por un mensaje raro
      */
     public AssistantMessageResponse responder(String mensaje) {
-        String texto = mensaje == null ? "" : mensaje.trim();
-        String normalizado = TextNormalizer.normalize(texto);
+        String normalizado = TextNormalizer.normalize(mensaje);
 
         if (normalizado.isEmpty()) {
             return noEntendido();
         }
-        if (contieneClave(normalizado, CLAVES_EMERGENCIA)) {
-            return emergencia();
+
+        // 1. Seguridad, siempre primero.
+        AssistantRules.Seguridad seguridad = AssistantRules.clasificarSeguridad(normalizado);
+        if (seguridad != null) {
+            return switch (seguridad) {
+                case EMERGENCIA -> emergencia();
+                case AUTOLESION -> autolesion();
+                case INYECCION -> manipulacion();
+                case DIAGNOSTICO -> sinDiagnostico();
+                case DOSIS_O_RECETA -> sinDosisNiReceta();
+            };
         }
-        if (contieneClave(normalizado, CLAVES_SALUDO)) {
+
+        // 2. Medicamento del catalogo.
+        Medicine medicamento = buscarMedicamentoMencionado(normalizado);
+        if (medicamento != null) {
+            return AssistantRules.esPreguntaComercial(normalizado)
+                    ? sinPreciosNiCompras()
+                    : sobreMedicamento(medicamento);
+        }
+
+        // 3. Saludo.
+        if (AssistantRules.esSaludo(normalizado)) {
             return saludo();
         }
 
-        Medicine medicamento = buscarMedicamentoMencionado(normalizado);
-        if (medicamento != null) {
-            return sobreMedicamento(medicamento);
+        // 4. Sintomas: fuera de la fase 1.
+        if (AssistantRules.mencionaSintoma(normalizado)) {
+            return sintomasFueraDeAlcance();
         }
-        if (contieneClave(normalizado, CLAVES_DIAGNOSTICO)) {
-            return fueraDeAlcance();
+
+        // 5. Pregunta por un medicamento que no esta en el catalogo.
+        if (AssistantRules.parecePreguntaDeMedicamento(normalizado)) {
+            return medicamentoNoEncontrado();
         }
-        if (contieneClave(normalizado, CLAVES_SINTOMAS)) {
-            return orientacionSintomas();
-        }
+
         return noEntendido();
     }
 
     // ------------------------------------------------------------------
-    //  Intenciones
+    //  Seguridad
     // ------------------------------------------------------------------
 
     private AssistantMessageResponse emergencia() {
         return crear(
                 "Lo que describes puede ser una urgencia medica. Llama ahora a la linea de "
                         + "emergencias (123 en Colombia) o acude al servicio de urgencias mas cercano. "
-                        + "No esperes a que los sintomas empeoren y no te automediques.",
+                        + "Si hay alguien contigo, pidele que te acompane. No esperes a que los "
+                        + "sintomas empeoren y no te automediques.",
                 AssistantMessageResponse.INTENT_EMERGENCIA,
                 0.95,
                 true,
-                List.of("Llamar a la linea de emergencias", "Ir al servicio de urgencias mas cercano"),
+                List.of("Llamar a la linea de emergencias (123)", "Ir al servicio de urgencias mas cercano"),
                 List.of("Protocolo de urgencias de MediCore"),
                 Map.of());
     }
 
-    private AssistantMessageResponse saludo() {
+    private AssistantMessageResponse autolesion() {
         return crear(
-                "Hola, soy Mol, tu asistente de MediCore. Puedo darte informacion del catalogo de "
-                        + "medicamentos (para que sirve, dosis habitual y precauciones), orientarte de "
-                        + "forma general sobre sintomas y recordarte cuando conviene consultar a un medico. "
-                        + "No puedo diagnosticar ni recetar.",
-                AssistantMessageResponse.INTENT_SALUDO,
-                0.9,
-                false,
-                List.of("Preguntar por un medicamento", "Evaluar mis sintomas", "Calcular mi IMC"),
-                List.of("Asistente MediCore"),
+                "Siento mucho que estes pasando por algo tan doloroso, y me importa que estes a "
+                        + "salvo. Lo que sientes merece la atencion de una persona real ahora mismo: "
+                        + "si estas en peligro inmediato, llama al 123. Si puedes, busca a alguien de "
+                        + "confianza que este cerca para que te acompane. Tambien puedes acudir a "
+                        + "urgencias, donde te pueden ayudar de inmediato.",
+                AssistantMessageResponse.INTENT_AUTOLESION,
+                0.95,
+                true,
+                List.of("Llamar al 123", "Contactar a una persona de confianza"),
+                List.of("Protocolo de urgencias de MediCore"),
                 Map.of());
     }
+
+    private AssistantMessageResponse manipulacion() {
+        return crear(
+                "No puedo cambiar mis reglas de seguridad ni compartir informacion interna. "
+                        + "Si puedo darte informacion general sobre los medicamentos del catalogo. "
+                        + "Sobre cual te gustaria saber?",
+                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
+                0.8,
+                false,
+                List.of("Preguntar por un medicamento"),
+                List.of("Politica de seguridad de MediCore"),
+                Map.of());
+    }
+
+    private AssistantMessageResponse sinDiagnostico() {
+        return crear(
+                "No puedo diagnosticar enfermedades ni decirte que tienes: eso requiere una "
+                        + "valoracion medica. Si tienes dificultad para respirar, dolor de pecho, "
+                        + "fiebre muy alta o que no cede, confusion o un sintoma que empeora rapido, "
+                        + "busca atencion medica pronto. Para orientacion, consulta con tu EPS o un medico.",
+                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
+                0.85,
+                false,
+                List.of("Consultar un profesional de la salud", "Preguntar por un medicamento"),
+                List.of("Politica de seguridad de MediCore"),
+                Map.of());
+    }
+
+    private AssistantMessageResponse sinDosisNiReceta() {
+        return crear(
+                "No puedo indicar cantidades, horarios ni recomendar que tratamiento tomar en tu "
+                        + "caso: depende de tu edad, peso, otras enfermedades, embarazo y otros "
+                        + "medicamentos. Esa decision debe tomarla un medico o un farmaceutico, y en el "
+                        + "empaque o el prospecto del producto encuentras la informacion oficial.",
+                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
+                0.85,
+                false,
+                List.of("Consultar a un farmaceutico o medico", "Leer el prospecto"),
+                List.of("Politica de seguridad de MediCore"),
+                Map.of());
+    }
+
+    // ------------------------------------------------------------------
+    //  Medicamentos
+    // ------------------------------------------------------------------
 
     private AssistantMessageResponse sobreMedicamento(Medicine medicamento) {
         StringBuilder texto = new StringBuilder();
@@ -134,16 +194,21 @@ public class AssistantService {
         if (medicamento.getUses() != null) {
             texto.append("Para que sirve: ").append(recortar(medicamento.getUses(), 220)).append(" ");
         }
-        if (medicamento.getPosology() != null) {
-            texto.append("Dosis habitual: ").append(recortar(medicamento.getPosology(), 160)).append(" ");
+        if (medicamento.getWhenToTake() != null && !medicamento.getWhenToTake().isBlank()) {
+            texto.append("Se usa habitualmente en: ")
+                    .append(recortar(medicamento.getWhenToTake(), 160)).append(" ");
         }
 
-        List<String> precauciones = medicamento.getPrecautions();
-        if (precauciones != null && !precauciones.isEmpty()) {
-            texto.append("Precauciones: ")
-                    .append(String.join("; ", precauciones.subList(0, Math.min(2, precauciones.size()))))
+        List<String> precauciones = precaucionesSinCifras(medicamento);
+        if (!precauciones.isEmpty()) {
+            texto.append("Precauciones y contraindicaciones: ")
+                    .append(String.join("; ", precauciones.subList(0, Math.min(3, precauciones.size()))))
                     .append(". ");
         }
+        if (requiereReceta(medicamento)) {
+            texto.append("Importante: este medicamento requiere prescripcion medica. ");
+        }
+        texto.append("Las pautas de uso las define tu medico o farmaceutico y estan en el prospecto. ");
         texto.append(AVISO_MEDICO);
 
         Map<String, Object> datos = new LinkedHashMap<>();
@@ -151,7 +216,7 @@ public class AssistantService {
         datos.put("nombre", medicamento.getName());
         datos.put("categoria", medicamento.getCategory());
         datos.put("presentacion", medicamento.getDose());
-        datos.put("precauciones", precauciones == null ? List.of() : precauciones);
+        datos.put("precauciones", precauciones);
 
         return crear(
                 texto.toString(),
@@ -165,43 +230,72 @@ public class AssistantService {
                 datos);
     }
 
-    private AssistantMessageResponse fueraDeAlcance() {
+    private AssistantMessageResponse medicamentoNoEncontrado() {
         return crear(
-                "No puedo diagnosticar enfermedades ni recetar medicamentos: eso requiere una "
-                        + "valoracion medica. Si quieres, puedo mostrarte informacion del catalogo o "
-                        + "darte orientacion general sobre tus sintomas, y siempre te recomendare "
-                        + "acudir a un profesional cuando haga falta.",
-                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
-                0.8,
+                "No encontre ese medicamento en el catalogo de MediCore, asi que no tengo "
+                        + "informacion para darte. Revisa la ortografia o prueba con el nombre "
+                        + "generico (por ejemplo: Ibuprofeno, Loratadina u Omeprazol). Para cualquier "
+                        + "medicamento, el prospecto y tu farmaceutico son la fuente confiable.",
+                AssistantMessageResponse.INTENT_MEDICAMENTO_NO_ENCONTRADO,
+                0.7,
                 false,
-                List.of("Evaluar mis sintomas", "Consultar un profesional de la salud"),
-                List.of("Politica de seguridad de MediCore"),
+                List.of("Revisar la ortografia", "Ver el catalogo", "Consultar a un farmaceutico"),
+                List.of("Catalogo MediCore"),
                 Map.of());
     }
 
-    private AssistantMessageResponse orientacionSintomas() {
+    private AssistantMessageResponse sinPreciosNiCompras() {
         return crear(
-                "Puedo darte orientacion general, pero no un diagnostico. Para una valoracion "
-                        + "guiada usa el modulo \"Me siento mal\", que cruza tus sintomas con cuadros "
-                        + "comunes y te indica cuando acudir al medico. Si el malestar es intenso, "
-                        + "repentino o no mejora, consulta a un profesional.",
-                AssistantMessageResponse.INTENT_SINTOMAS,
-                0.6,
+                "No manejo precios, compra ni disponibilidad de medicamentos: mi catalogo solo "
+                        + "tiene informacion general (para que sirven, cuando se usan y sus "
+                        + "precauciones). Para precios o donde conseguirlos, consulta en una farmacia.",
+                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
+                0.8,
                 false,
-                List.of("Abrir Me siento mal", "Preguntar por un medicamento", "Consultar un profesional"),
-                List.of("Guia de orientacion de sintomas de MediCore"),
+                List.of("Consultar en una farmacia", "Preguntar por un medicamento"),
+                List.of("Asistente MediCore"),
+                Map.of());
+    }
+
+    // ------------------------------------------------------------------
+    //  Otras intenciones
+    // ------------------------------------------------------------------
+
+    private AssistantMessageResponse saludo() {
+        return crear(
+                "Hola, soy Mol, tu asistente de MediCore. Puedo darte informacion de los "
+                        + "medicamentos del catalogo: para que sirven, cuando se usan y sus "
+                        + "precauciones. No puedo diagnosticar ni recetar.",
+                AssistantMessageResponse.INTENT_SALUDO,
+                0.9,
+                false,
+                List.of("Preguntar por un medicamento", "Ver el catalogo"),
+                List.of("Asistente MediCore"),
+                Map.of());
+    }
+
+    private AssistantMessageResponse sintomasFueraDeAlcance() {
+        return crear(
+                "Por ahora solo puedo darte informacion de los medicamentos del catalogo; no "
+                        + "oriento sobre sintomas ni los diagnostico. Para una valoracion guiada usa el "
+                        + "modulo \"Me siento mal\" de MediCore. Si el malestar es intenso, repentino "
+                        + "o no mejora, consulta a un profesional de la salud.",
+                AssistantMessageResponse.INTENT_FUERA_DE_ALCANCE,
+                0.7,
+                false,
+                List.of("Abrir Me siento mal", "Consultar un profesional", "Preguntar por un medicamento"),
+                List.of("Politica de seguridad de MediCore"),
                 Map.of());
     }
 
     private AssistantMessageResponse noEntendido() {
         return crear(
                 "No estoy seguro de haber entendido. Puedo ayudarte con informacion de "
-                        + "medicamentos del catalogo (por ejemplo \"para que sirve el ibuprofeno\"), "
-                        + "orientacion general de sintomas y recordatorios de cuando consultar a un medico.",
+                        + "medicamentos del catalogo (por ejemplo \"para que sirve el ibuprofeno\").",
                 AssistantMessageResponse.INTENT_NO_ENTENDIDO,
                 0.3,
                 false,
-                List.of("Preguntar por un medicamento", "Evaluar mis sintomas", "Ver el catalogo"),
+                List.of("Preguntar por un medicamento", "Ver el catalogo"),
                 List.of("Asistente MediCore"),
                 Map.of());
     }
@@ -210,23 +304,62 @@ public class AssistantService {
     //  Utilidades
     // ------------------------------------------------------------------
 
-    /** Devuelve el medicamento cuyo nombre aparece en el mensaje (el mas largo). */
+    /**
+     * Devuelve el medicamento del catalogo que el mensaje nombra (el nombre mas
+     * largo gana: "Cafeina + Acetaminofen" antes que "Acetaminofen"), o el que
+     * corresponde a una marca o alias ("Dolex" -> Acetaminofen).
+     */
     private Medicine buscarMedicamentoMencionado(String normalizado) {
+        List<Medicine> catalogo = medicineService.search(null, null);
+
         Medicine encontrado = null;
         int longitud = 0;
-
-        for (Medicine medicamento : medicineService.search(null, null)) {
-            String nombre = TextNormalizer.normalize(medicamento.getName());
-            if (nombre.length() >= 4 && normalizado.contains(nombre) && nombre.length() > longitud) {
+        for (Medicine medicamento : catalogo) {
+            String nombre = nombreBuscable(medicamento);
+            if (nombre.length() >= 4
+                    && nombre.length() > longitud
+                    && AssistantRules.contienePalabra(normalizado, nombre)) {
                 encontrado = medicamento;
                 longitud = nombre.length();
             }
         }
-        return encontrado;
+        if (encontrado != null) {
+            return encontrado;
+        }
+
+        String destino = AssistantRules.resolverAlias(normalizado);
+        if (destino != null) {
+            for (Medicine medicamento : catalogo) {
+                if (TextNormalizer.normalize(medicamento.getName()).equals(destino)) {
+                    return medicamento;
+                }
+            }
+        }
+        return null;
     }
 
-    private boolean contieneClave(String textoNormalizado, List<String> claves) {
-        return claves.stream().anyMatch(textoNormalizado::contains);
+    /** Nombre normalizado; "Aloe vera crema" tambien se encuentra como "aloe vera". */
+    private String nombreBuscable(Medicine medicamento) {
+        return TextNormalizer.normalize(medicamento.getName()).replaceAll(" crema$", "");
+    }
+
+    /** Precauciones sin las que traen cifras (limites de dosis o duracion). */
+    private List<String> precaucionesSinCifras(Medicine medicamento) {
+        List<String> precauciones = medicamento.getPrecautions();
+        if (precauciones == null) {
+            return List.of();
+        }
+        return precauciones.stream()
+                .filter(p -> p != null && !p.isBlank() && !TIENE_CIFRAS.matcher(p).find())
+                .toList();
+    }
+
+    private boolean requiereReceta(Medicine medicamento) {
+        List<String> precauciones = medicamento.getPrecautions();
+        boolean enPrecauciones = precauciones != null
+                && precauciones.stream().anyMatch(p -> p != null && REQUIERE_RECETA.matcher(p).find());
+        String cuando = medicamento.getWhenToTake();
+        return enPrecauciones || (cuando != null && REQUIERE_RECETA.matcher(cuando).find());
     }
 
     private String recortar(String texto, int maximo) {
