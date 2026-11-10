@@ -47,7 +47,7 @@ Response 200:
   "id": "msg_ab12cd34ef56",
   "mode": "prototype",
   "provider": "controlled | anthropic",
-  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | coming_soon | medication_not_found | drug_interaction | interaction_clarification | greeting | out_of_scope",
+  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | coming_soon | medication_not_found | treatment_change_refused | drug_interaction | interaction_clarification | greeting | out_of_scope",
   "safety": { "level": "ok | refused | blocked | emergency", "flags": [] },
   "reply": "texto",
   "sources": [{ "name": "…", "url": "… | null" }],
@@ -112,3 +112,13 @@ Ejecutar pruebas: `npm test` (más de 100 pruebas, sin dependencias). Ejemplos r
 - **Sin pautas de tratamiento:** nada de dosis ni horarios; no recomienda iniciar, suspender ni cambiar tratamientos; siempre remite a médico o farmacéutico.
 - **Prioridad:** emergencia, autolesión, inyección, diagnóstico y dosis/embarazo/niños se evalúan antes y siguen rechazándose.
 - **Pendiente antes de producción:** revisión clínica de la tabla por un profesional de farmacia y fuente bibliográfica por regla.
+
+## Límites de seguridad médica (issue #65)
+
+- **No prescribe ni ajusta:** dosis, horarios y «qué me tomo» siguen rechazándose (`prescription_refused`).
+- **No manda suspender ni cambiar tratamientos:** «¿puedo dejar el antibiótico?», «quiero dejar la metformina» o «¿puedo subir la dosis?» devuelven `treatment_change_refused` (texto fijo, nunca IA), con riesgos generales, señales de alarma y remisión a quien lo recetó.
+- **Señales de alarma:** además de dolor de pecho, falta de aire, etc., se reconocen dolor de cabeza o abdominal muy intenso, pérdida de visión, labios azulados, reacción alérgica grave y rigidez de cuello con fiebre. Siempre tienen prioridad.
+- **Incertidumbre:** las fichas indican que son del catálogo (sin revisión clínica) y pueden estar incompletas; las interacciones nunca garantizan seguridad.
+- **Orientación general, no consejo individualizado:** se repite en las respuestas de rechazo y en el aviso de cada respuesta.
+- **Filtro de salida de IA:** descarta respuestas que recomienden suspender o cambiar tratamientos o que presenten certezas absolutas («sin ningún riesgo», «es seguro combinarlos»), salvo negaciones responsables («no suspendas…»). El prompt del sistema incluye las mismas reglas.
+- **Pendiente:** revisión clínica de las reglas de alarma y de los textos por un profesional de salud.

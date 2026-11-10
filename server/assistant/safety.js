@@ -26,7 +26,13 @@ const RULES = {
     /(cara|labios|lengua|garganta) (hinchad|inflamad)|(hincharon|inflamaron) (la |los |mi |las )?(cara|labios|lengua|garganta)|hinchazon (de |en )?(la )?(cara|lengua|garganta|labios)|anafila/,
     /sobredosis|intoxicacion|envenen|me tome (todas|muchas|un monton)/,
     /cara caida|no puedo (mover|hablar)|habla (arrastrada|confusa)|derrame|paralisis/,
-    /(bebe|recien nacido).*(fiebre|no respira|morado)/
+    /(bebe|recien nacido).*(fiebre|no respira|morado)/,
+    /reaccion alergica (grave|severa|fuerte)/,
+    /(labios|unas|cara|piel) (morad[oa]s?|azulad[oa]s?)/,
+    /dolor (abdominal|de estomago|de barriga|de vientre) (muy |extremo |intenso |severo |insoportable )?(intenso|severo|insoportable|extremo)|dolor (muy )?(intenso|severo|insoportable) (en |del |de )?(el )?(abdomen|estomago|vientre|barriga)/,
+    /(peor|mas fuerte) dolor de cabeza|dolor de cabeza (repentino|subito|insoportable|explosivo)|dolor de cabeza.{0,20}(peor de mi vida)/,
+    /rigidez (de|en el) cuello.{0,40}fiebre|fiebre.{0,40}rigidez (de|en el) cuello/,
+    /perdi (la )?vision|perdida (repentina |subita )?de (la )?vision|vision (borrosa|doble) (repentina|de repente|subita)/
   ],
   self_harm: [
     /suicid|quitarme la vida|quiero morir|no quiero (seguir )?viviendo|no quiero vivir|acabar con (mi vida|todo)|hacerme dano|hacerme algo malo|ganas de morir|quisiera (no existir|desaparecer)|(me )?quiero (hacer|causar)(me)? dano|mejor (estar )?muert[oa]/
@@ -35,6 +41,12 @@ const RULES = {
     /ignora (todas )?(tus|las) (instrucciones|reglas)|olvida (tus|las) (instrucciones|reglas)/,
     /(muestra|dime|revela|imprime).{0,30}(system prompt|prompt del sistema|instrucciones internas|api ?key|clave)/,
     /actua como (un )?(medico|doctor)|modo (desarrollador|sin restricciones)|jailbreak|ignore (all )?(previous|prior) instructions/
+  ],
+  // Suspender, interrumpir o ajustar un tratamiento por cuenta propia (issue #65). Con un medicamento del catálogo se completa en engine.js
+  treatment_change: [
+    /\b(dejar|deje|dejo|dejando|suspender|suspendo|suspenda|suspendiendo|parar|paro|interrumpir|interrumpo|cortar|corto|abandonar|saltarme|saltar|omitir|omito)\b.{0,30}\b(de tomar|de usar|el tratamiento|mi tratamiento|tratamiento|medicamentos?|medicinas?|medicacion|pastillas?|antibioticos?|insulina|las dosis|la dosis)\b/,
+    /\b(reducir|reduzco|bajar|bajo|aumentar|aumento|subir|subo|duplicar|duplico|cambiar|cambio|modificar|modifico|ajustar|ajusto)\b.{0,20}\b(la |mi |el |las |mis )?(dosis|tratamiento|medicacion)\b/,
+    /ya me siento (mejor|bien).{0,60}(dej|suspend|par|termin|segu)/
   ],
   diagnosis: [
     /diagnostic(a|ame|o)|que (enfermedad|tengo|me pasa|podria tener|puedo tener)|cual es mi enfermedad/,
@@ -50,10 +62,13 @@ const RULES = {
   ]
 };
 
+const STOP_VERB = /\b(dejar|deje|dejo|dejando|suspender|suspendo|suspenda|suspendiendo|parar|paro|interrumpir|interrumpo|cortar|corto|abandonar|saltarme|omitir|omito)\b/;
+const hasStopVerb = (message) => STOP_VERB.test(normalize(message));
+
 /** Devuelve la categoría de seguridad más prioritaria o null. Orden = prioridad. */
 function classifySafety(message) {
   const text = normalize(message);
-  for (const category of ['emergency', 'self_harm', 'prompt_injection', 'diagnosis', 'prescription']) {
+  for (const category of ['emergency', 'self_harm', 'prompt_injection', 'diagnosis', 'treatment_change', 'prescription']) {
     if (RULES[category].some((re) => re.test(text))) return category;
   }
   return null;
@@ -68,7 +83,11 @@ const OUTPUT_VIOLATIONS = [
   ['dosage', /\b(tome|toma|tomar|administre|aplique)\b.{0,25}\b\d+/i],
   ['diagnosis', /\b(tienes|tiene|padeces|padece|sufres de)\s+(una |un |la |el )?(gripe|covid|dengue|infeccion|cancer|diabetes|neumonia|gastroenteritis|alergia)/i],
   ['diagnosis', /\b(diagnostico|diagnosticad[oa]).{0,15}(es|:)/i],
-  ['prescription', /\b(te|le) (receto|prescribo|recomiendo (tomar|que tome))\b/i]
+  ['prescription', /\b(te|le) (receto|prescribo|recomiendo (tomar|que tome))\b/i],
+  ['treatment_change', /(?<!\bno )(?<!\bni )\b(puedes|puede|debes|debe|deberias|deberia|te recomiendo|le recomiendo|es mejor que)\b.{0,25}\b(dejar|suspender|interrumpir|parar|cambiar|reducir|aumentar|subir|bajar)\b.{0,25}\b(tratamiento|medicamento|medicina|pastilla|dosis|medicacion|de tomar)\b/i],
+  ['treatment_change', /(?<!\bno )(?<!\bni )\b(deja|dejes|suspende|suspendas|interrumpe|interrumpas)\b.{0,25}\b(de tomar|tomar|tratamiento|medicamento|medicina|pastilla)/i],
+  ['certainty', /\b(100 ?%|sin (ningun|ninguna) (riesgo|problema|duda)|totalmente seguro|completamente seguro|garantizo|garantizado|no (hay|existe|tiene) (ningun )?riesgo|sin duda alguna)\b/i],
+  ['certainty', /\bes seguro (tomar|combinar|mezclar|usar)/i]
 ];
 
 function checkOutput(reply) {
@@ -76,4 +95,4 @@ function checkOutput(reply) {
   return OUTPUT_VIOLATIONS.filter(([, re]) => re.test(text)).map(([name]) => name);
 }
 
-module.exports = { normalize, classifySafety, checkOutput };
+module.exports = { normalize, classifySafety, checkOutput, hasStopVerb };

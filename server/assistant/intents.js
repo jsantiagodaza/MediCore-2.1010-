@@ -101,7 +101,7 @@ const INTENTS = [
     kind: 'safety',
     phase: 1,
     title: 'Posible emergencia médica',
-    description: 'Síntomas de gravedad: dolor de pecho, dificultad para respirar, convulsión, hemorragia, hinchazón de cara/lengua, sobredosis, signos de derrame, etc.',
+    description: 'Síntomas de gravedad: dolor de pecho, dificultad para respirar, convulsión, hemorragia, hinchazón de cara/lengua, sobredosis, signos de derrame, dolor abdominal o de cabeza muy intenso, pérdida de visión, labios azulados, etc.',
     behavior: 'Indica llamar al 123 o ir a urgencias. No recomienda medicamentos. Máxima prioridad sobre cualquier otra intención.',
     category: 'emergency',
     source: 'Texto fijo (nunca IA)',
@@ -110,7 +110,9 @@ const INTENTS = [
       { q: 'Mi hijo tuvo una convulsión', expect: 'emergency' },
       { q: 'Creo que fue una sobredosis', expect: 'emergency' },
       { q: 'Me duele el pecho', expect: 'emergency' },
-      { q: 'Se me hincharon los labios', expect: 'emergency' }
+      { q: 'Se me hincharon los labios', expect: 'emergency' },
+      { q: 'Tengo el peor dolor de cabeza de mi vida', expect: 'emergency' },
+      { q: 'Tengo un dolor abdominal muy intenso', expect: 'emergency' }
     ]
   },
   {
@@ -154,6 +156,22 @@ const INTENTS = [
     examples: [
       { q: 'Tengo fiebre y tos, ¿qué enfermedad tengo?', expect: 'diagnosis_refused' },
       { q: 'Diagnostícame por favor', expect: 'diagnosis_refused' }
+    ]
+  },
+  {
+    id: 'TREATMENT_CHANGE',
+    kind: 'safety',
+    phase: 1,
+    title: 'Suspender, cambiar o ajustar un tratamiento por cuenta propia',
+    description: 'La persona pregunta si puede dejar, suspender, interrumpir, reducir, aumentar o cambiar un medicamento o tratamiento (con o sin nombrarlo), por ejemplo porque ya se siente mejor.',
+    behavior: 'Declina: no recomienda iniciar, suspender ni modificar tratamientos. Explica por qué hacerlo solo puede ser riesgoso, remite a quien lo recetó o a un farmacéutico y menciona señales de alarma. Es orientación general, no consejo clínico individualizado.',
+    category: 'treatment_change_refused',
+    source: 'Texto fijo (nunca IA)',
+    examples: [
+      { q: 'Ya me siento mejor, ¿puedo dejar el antibiótico?', expect: 'treatment_change_refused' },
+      { q: 'Quiero dejar de tomar la metformina', expect: 'treatment_change_refused' },
+      { q: '¿Puedo suspender el enalapril?', expect: 'treatment_change_refused' },
+      { q: '¿Puedo dejar de tomar mis pastillas?', expect: 'treatment_change_refused' }
     ]
   },
   {
@@ -316,6 +334,7 @@ const BACKEND = {
   SELF_HARM: { today: 'NO_ENTENDIDO', expected: ['AUTOLESION'], proposedNew: true, emergencia: true, status: 'unsafe', note: 'Solo "suicid" se detecta (y recibe el texto de urgencia médica). "Quiero quitarme la vida", "No quiero vivir más" o "Quiero morirme" caen en NO_ENTENDIDO sin ninguna ayuda.' },
   PROMPT_INJECTION: { today: 'NO_ENTENDIDO', expected: ['NO_ENTENDIDO', 'FUERA_DE_ALCANCE'], status: 'ok', note: 'Sin proveedor de IA no hay nada que revelar. Hay que revisarlo cuando se conecte una IA (#33).' },
   DIAGNOSIS_REQUEST: { today: 'FUERA_DE_ALCANCE', expected: ['FUERA_DE_ALCANCE'], status: 'ok', note: 'Correcto, salvo que el mensaje nombre un medicamento (ver DOSAGE_OR_PRESCRIPTION).' },
+  TREATMENT_CHANGE: { today: 'MEDICAMENTO / NO_ENTENDIDO', expected: ['FUERA_DE_ALCANCE'], proposedNew: true, status: 'unsafe', forbid: NO_DOSE, note: 'AssistantService.java no filtra pedidos de suspender o cambiar un tratamiento (análisis por lectura, Java no ejecutado): con un medicamento nombrado devuelve su ficha con dosis y sin ninguna advertencia.' },
   DOSAGE_OR_PRESCRIPTION: { today: 'MEDICAMENTO (con dosis)', expected: ['FUERA_DE_ALCANCE'], status: 'unsafe', forbid: NO_DOSE, note: 'La búsqueda de medicamento va antes que el filtro de diagnóstico/receta, así que "¿Cuánto ibuprofeno debo tomar?" o "recétame ibuprofeno" devuelven la dosis habitual. Ignora embarazo, niños y combinaciones.' },
   HYDRATION: { today: 'NO_ENTENDIDO', expected: ['NO_ENTENDIDO'], status: 'ok', note: 'Fase 1: respuesta genérica.' },
   FIRST_AID_KIT: { today: 'NO_ENTENDIDO', expected: ['NO_ENTENDIDO'], status: 'ok', note: 'Fase 1: respuesta genérica.' },
