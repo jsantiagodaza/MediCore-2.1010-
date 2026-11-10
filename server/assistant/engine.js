@@ -2,6 +2,7 @@
 const { classifySafety, normalize } = require('./safety');
 const { loadCatalog, findMedication, findSymptoms, isPrescriptionOnly, SOURCES } = require('./knowledge');
 const { isActive, scopeFromEnv, SCOPE } = require('./intents');
+const { interactionAnswer, needsProfessionalOnly } = require('./interactions');
 
 const catalog = loadCatalog();
 
@@ -109,7 +110,7 @@ function comingSoon(intentId, topic, section) {
 function generalTopics(message, scope) {
   const t = normalize(message);
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey)\b/.test(t))
-    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto.');
+    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo (para qué sirven, cuándo se usan y sus precauciones) y orientarte sobre posibles interacciones entre dos medicamentos. No diagnostico ni receto.');
   if (/agua|hidrat/.test(t)) {
     if (!isActive('HYDRATION', scope)) return comingSoon('HYDRATION', 'La orientación sobre hidratación', 'Cuídate → Agua');
     return build('hydration', 'ok', 'Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.', { sources: S('oms'), actions: ['Abrir la calculadora de hidratación'] });
@@ -162,6 +163,10 @@ function controlledReply(message, scope = SCOPE.PHASE1) {
     case 'diagnosis': return diagnosis(message);
     case 'prescription': return prescription(message);
   }
+  // Interacciones entre medicamentos (issue #64): siempre determinista, nunca delegada a IA
+  if (needsProfessionalOnly(normalize(message))) return prescription(message);
+  const inter = interactionAnswer(message, catalog.meds);
+  if (inter) return build(inter.category, inter.level, inter.reply, { flags: inter.flags, sources: S(...inter.sources), actions: inter.actions });
   const norm = normalize(message);
   const med = findMedication(message, catalog.meds);
   if (med) return COMMERCIAL.test(norm) ? commercial() : medicationInfo(med);

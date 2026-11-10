@@ -74,6 +74,27 @@ const INTENTS = [
     ]
   },
 
+  {
+    id: 'DRUG_INTERACTION',
+    kind: 'supported',
+    phase: 1,
+    title: 'Interacciones entre dos medicamentos del catálogo',
+    description:
+      'La persona pregunta si hay problema al tomar dos medicamentos a la vez («Estoy tomando X, ¿hay problema si también tomo Y?»). Reconoce nombres genéricos y marcas comunes.',
+    behavior:
+      'Reconoce los dos medicamentos y consulta una tabla de interacciones documentadas (interactions.js). Si hay una, la explica con cautela y su relevancia (importante / moderada / duplicidad); si no, dice que no está en su base y que eso NO garantiza seguridad. Si un nombre es ambiguo (p. ej. «un antiinflamatorio») o falta el segundo medicamento, pide aclaración en vez de adivinar. Nunca da dosis ni horarios, nunca recomienda iniciar, suspender o cambiar un tratamiento y siempre remite a un médico o farmacéutico. Con embarazo, niños o pedidos de dosis prevalece DOSAGE_OR_PRESCRIPTION.',
+    category: 'drug_interaction',
+    source: 'Tabla de interacciones documentadas (server/assistant/interactions.js, sin revisión clínica) + MedlinePlus/INVIMA como referencia',
+    examples: [
+      { q: '¿Puedo tomar ibuprofeno con aspirina?', expect: 'drug_interaction' },
+      { q: 'Estoy tomando warfarina. ¿Hay algún problema si también tomo ibuprofeno?', expect: 'drug_interaction' },
+      { q: '¿Es seguro tomar sertralina con tramadol?', expect: 'drug_interaction' },
+      { q: '¿Puedo tomar loratadina con omeprazol?', expect: 'drug_interaction' },
+      { q: 'Tomo un antiinflamatorio, ¿puedo tomar warfarina también?', expect: 'interaction_clarification' },
+      { q: '¿Puedo mezclar ibuprofeno con otro medicamento?', expect: 'interaction_clarification' }
+    ]
+  },
+
   // ───────────────── Seguridad (siempre activas, prioridad máxima) ─────────────────
   {
     id: 'EMERGENCY',
@@ -141,7 +162,7 @@ const INTENTS = [
     phase: 1,
     title: 'Pedir dosis, receta o "qué me tomo"',
     description:
-      'Dosis, horarios, cantidades, qué medicamento tomar para un caso, combinar medicamentos, o uso en niños, embarazo o lactancia.',
+      'Dosis, horarios, cantidades, qué medicamento tomar para un caso, o uso en niños, embarazo o lactancia. (Las preguntas sobre combinar dos medicamentos las atiende DRUG_INTERACTION.)',
     behavior:
       'Declina: depende de cada persona y lo decide un médico o farmacéutico. Si nombró un medicamento del catálogo, ofrece la información general SIN dosis.',
     category: 'prescription_refused',
@@ -149,7 +170,7 @@ const INTENTS = [
     examples: [
       { q: '¿Cuánto ibuprofeno debo tomar?', expect: 'prescription_refused' },
       { q: '¿Qué me tomo para la gripe?', expect: 'prescription_refused' },
-      { q: '¿Puedo tomar ibuprofeno con aspirina?', expect: 'prescription_refused' },
+      { q: '¿Cuántas pastillas de ibuprofeno y aspirina puedo tomar juntas?', expect: 'prescription_refused' },
       { q: 'Estoy embarazada, ¿puedo tomar acetaminofén?', expect: 'prescription_refused' }
     ]
   },
@@ -290,6 +311,7 @@ const BACKEND = {
   MED_INFO: { today: 'MEDICAMENTO (con dosis)', expected: ['MEDICAMENTO'], status: 'gap', forbid: NO_DOSE, note: 'Siempre incluye "Dosis habitual" (campo posology) y no reconoce marcas como Dolex.' },
   MED_NOT_FOUND: { today: 'NO_ENTENDIDO', expected: ['MEDICAMENTO_NO_ENCONTRADO'], proposedNew: true, status: 'gap', note: 'Devuelve el mensaje genérico "no entendí"; no dice que el medicamento no está en el catálogo.' },
   GREETING: { today: 'SALUDO', expected: ['SALUDO'], status: 'ok', note: 'Correcto para saludos simples. Ojo: su texto promete "dosis habitual" (D2) y tiene prioridad sobre la pregunta que venga después (ver 6.2).' },
+  DRUG_INTERACTION: { today: 'MEDICAMENTO / NO_ENTENDIDO', expected: ['INTERACCION', 'INTERACCION_ACLARACION'], proposedNew: true, status: 'gap', forbid: NO_DOSE, note: 'AssistantService.java no tiene lógica de interacciones (análisis por lectura, Java no ejecutado): responde la ficha de un medicamento o "no entendí". Hay que portar la tabla de interactions.js o consumirla del servidor Node.' },
   EMERGENCY: { today: 'EMERGENCIA', expected: ['EMERGENCIA'], emergencia: true, status: 'ok', note: 'Detecta frases exactas, pero "Me duele el pecho" cae en SINTOMAS y no se reconocen "opresión en el pecho", "me cuesta respirar", "vomité sangre" ni la hinchazón de labios o lengua.' },
   SELF_HARM: { today: 'NO_ENTENDIDO', expected: ['AUTOLESION'], proposedNew: true, emergencia: true, status: 'unsafe', note: 'Solo "suicid" se detecta (y recibe el texto de urgencia médica). "Quiero quitarme la vida", "No quiero vivir más" o "Quiero morirme" caen en NO_ENTENDIDO sin ninguna ayuda.' },
   PROMPT_INJECTION: { today: 'NO_ENTENDIDO', expected: ['NO_ENTENDIDO', 'FUERA_DE_ALCANCE'], status: 'ok', note: 'Sin proveedor de IA no hay nada que revelar. Hay que revisarlo cuando se conecte una IA (#33).' },

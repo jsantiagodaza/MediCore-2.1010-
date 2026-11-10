@@ -47,7 +47,7 @@ Response 200:
   "id": "msg_ab12cd34ef56",
   "mode": "prototype",
   "provider": "controlled | anthropic",
-  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | coming_soon | medication_not_found | greeting | out_of_scope",
+  "category": "medication_info | emergency | self_harm | prompt_injection | diagnosis_refused | prescription_refused | hydration | first_aid_kit | coming_soon | medication_not_found | drug_interaction | interaction_clarification | greeting | out_of_scope",
   "safety": { "level": "ok | refused | blocked | emergency", "flags": [] },
   "reply": "texto",
   "sources": [{ "name": "…", "url": "… | null" }],
@@ -103,3 +103,12 @@ Ejecutar pruebas: `npm test` (más de 100 pruebas, sin dependencias). Ejemplos r
 - Evaluar clasificador de intención más robusto que regex.
 - Definir política de datos (consentimiento, retención) antes de guardar cualquier conversación.
 - Decidir el destino de `DIAGNOSES` / pantalla "Mal".
+
+## Interacciones entre medicamentos (issue #64)
+
+- **Determinista:** `server/assistant/interactions.js`. La IA nunca interviene, ni en fase 2.
+- **No inventa:** solo afirma lo que está en la tabla `RULES`. Si el par no está, responde que no lo tiene registrado y que eso **no** garantiza seguridad.
+- **Aclara en vez de adivinar:** nombres genéricos («un antiinflamatorio»), un solo medicamento o tres o más generan `interaction_clarification`.
+- **Sin pautas de tratamiento:** nada de dosis ni horarios; no recomienda iniciar, suspender ni cambiar tratamientos; siempre remite a médico o farmacéutico.
+- **Prioridad:** emergencia, autolesión, inyección, diagnóstico y dosis/embarazo/niños se evalúan antes y siguen rechazándose.
+- **Pendiente antes de producción:** revisión clínica de la tabla por un profesional de farmacia y fuente bibliográfica por regla.

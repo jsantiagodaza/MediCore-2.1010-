@@ -39,12 +39,12 @@ const RULES = {
   diagnosis: [
     /diagnostic(a|ame|o)|que (enfermedad|tengo|me pasa|podria tener|puedo tener)|cual es mi enfermedad/,
     /\b(tengo|tendre|sera) (cancer|covid|dengue|diabetes|vih|neumonia|infarto|apendicitis)/,
-    /es grave\b|me estoy muriendo|estoy enferm[oa] de/
+    /es grave\b(?!.*\b(tomar|combinar|mezclar|juntar|usar)\b)|me estoy muriendo|estoy enferm[oa] de/
   ],
   prescription: [
     /\bdosis\b|cuant[oa]s?\b(?!.*\b(agua|liquidos?|litros|vasos)\b).{0,40}\b(tomar|tomo|aplicar|aplico|darle|dar)\b|cada cuantas horas|cuantas (pastillas|tabletas|gotas)/,
     /recetame|formulame|recomiendame (un )?(medicamento|antibiotico|pastilla)|que (medicamento|pastilla|antibiotico) (me )?(tomo|debo tomar|puedo tomar)|que me (tomo|recomiendas tomar)/,
-    /puedo (tomar|mezclar|combinar).{0,40}(con|junto)|mezclar .* con|combinar .* con/,
+    // Las combinaciones de medicamentos ("¿puedo tomar X con Y?") ya NO se rechazan aquí: las atiende interactions.js (issue #64)
     /(para|a) (mi )?(hij[oa]|bebe|nino|nina|embarazada|mama|papa|abuel[oa])\b.*(tomar|dar|darle|medicamento|pastilla)/,
     /(estoy|esta) (embarazada|lactando)/
   ]
