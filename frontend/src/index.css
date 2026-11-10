@@ -3850,7 +3850,7 @@ h3 {
 }
 
 /* Celdas vacías totalmente invisibles para no romper la cuadrícula */
-.calendario-day.empty {
+.calendario-day.calendario-day--vacio {
   visibility: hidden;
   pointer-events: none;
   border: none;
