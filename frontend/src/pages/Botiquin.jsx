@@ -1,5 +1,7 @@
 // frontend/src/pages/Botiquin.jsx
 import { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { BOTIQUIN_ITEMS, BOTIQUIN_KITS, BOTIQUIN_REVISIONES, BOTIQUIN_FUENTES } from '../data/botiquin';
 import ModalFichaBotiquin from '../components/ModalFichaBotiquin';
 
@@ -120,6 +122,92 @@ export default function Botiquin() {
     alert(`✅ Se copiaron ${missing.length} elementos pendientes al portapapeles`);
   };
 
+  // NUEVO: Función auxiliar para cargar la imagen de Mol
+  const loadImage = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = url;
+    });
+  };
+
+  // ACTUALIZADO: Función para exportar a PDF con imagen y colores
+  const handleExportPDF = async () => {
+    if (allKitItems.length === 0) {
+      alert('No hay elementos en este botiquín para exportar.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    const kitName = currentKitId === 'todos' ? 'Catálogo General' : BOTIQUIN_KITS[currentKitId].titulo;
+    const dateStr = new Date().toLocaleDateString('es-CO');
+
+    // Cargar la imagen de Mol antes de generar el PDF
+    const molImg = await loadImage('/assets/mol_sello.png');
+
+    // 1. Encabezado
+    doc.setFontSize(22);
+    doc.setTextColor(11, 53, 88); // Navy
+    doc.text('MediCore - Mi Botiquín', 14, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(71, 103, 136); // Slate
+    doc.text(`Kit seleccionado: ${kitName}`, 14, 30);
+    doc.text(`Fecha de generación: ${dateStr}`, 14, 37);
+    doc.text(`Progreso actual: ${checkedCount} de ${total} elementos (${percent}%)`, 14, 44);
+
+    // Añadir imagen de Mol (Esquina superior derecha)
+    // Coordenadas: x=160, y=10, ancho=35, alto=35
+    doc.addImage(molImg, 'PNG', 160, 10, 35, 35);
+
+    // 2. Tabla de contenido
+    const tableData = allKitItems.map(item => [
+      item.nombre,
+      item.cant || '-',
+      item.tagLabel || 'Recomendado',
+      item.checked ? 'En botiquín' : 'Pendiente'
+    ]);
+
+    autoTable(doc, {
+      startY: 55, // Bajamos un poco la tabla para que no choque con la imagen
+      head: [['Elemento', 'Cantidad', 'Prioridad', 'Estado']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [0, 107, 255], textColor: [255, 255, 255] }, // Signal Blue
+      styles: { fontSize: 10, cellPadding: 4, valign: 'middle' },
+      columnStyles: {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 35, halign: 'center' } // Centramos el estado
+      },
+      // NUEVO: Lógica para pintar las celdas de la columna Estado
+      didParseCell: function (data) {
+        if (data.section === 'body' && data.column.index === 3) {
+          if (data.cell.raw === 'En botiquín') {
+            data.cell.styles.textColor = [22, 101, 52]; // Verde oscuro (texto)
+            data.cell.styles.fillColor = [220, 252, 231]; // Verde pastel suave (fondo)
+            data.cell.styles.fontStyle = 'bold';
+          } else if (data.cell.raw === 'Pendiente') {
+            data.cell.styles.textColor = [146, 64, 14]; // Marrón oscuro (texto)
+            data.cell.styles.fillColor = [254, 243, 199]; // Amarillo pastel suave (fondo)
+          }
+        }
+      }
+    });
+
+    // 3. Footer / Disclaimer
+    const finalY = doc.lastAutoTable.finalY || 50;
+    doc.setFontSize(9);
+    doc.setTextColor(166, 187, 209); // Mist
+    doc.text('Este documento es una guía orientativa generada por MediCore.', 14, finalY + 15);
+    doc.text('No reemplaza la evaluación médica profesional. Consulte siempre a un especialista.', 14, finalY + 20);
+    doc.text('MediCore 2.0 · Tu salud, simple.', 14, finalY + 30);
+
+    // 4. Descargar
+    doc.save(`MediCore_Botiquin_${currentKitId}_${dateStr.replace(/\//g, '-')}.pdf`);
+  };
+
   const kit = currentKitId === 'todos' ? null : BOTIQUIN_KITS[currentKitId];
 
   // Lógica del semáforo de revisión
@@ -230,6 +318,11 @@ export default function Botiquin() {
             <button className="btn btn-outline btn-sm" onClick={copyMissing}>📋 Copiar faltantes</button>
             <button className="btn btn-outline btn-sm" onClick={() => markAll(true)}>✓ Marcar todos</button>
             <button className="btn btn-outline btn-sm" onClick={() => markAll(false)}>✕ Limpiar</button>
+            
+            {/* BOTÓN EXPORTAR PDF */}
+            <button className="btn btn-primary btn-sm" onClick={handleExportPDF} title="Descargar mi botiquín en PDF">
+              📄 Exportar PDF
+            </button>
           </div>
         </div>
 
