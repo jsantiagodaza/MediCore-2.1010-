@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 MediCore. Todos los derechos reservados.</span>
-          <span>Inspirado en Navy ink on cool marble · Mol te acompaña siempre.</span>
+   
         </div>
       </div>
     </footer>
