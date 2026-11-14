@@ -76,9 +76,19 @@ class KitEndpointTest {
     }
 
     @Test
-    @DisplayName("agrega y lista un medicamento")
-    void agregaYLista() throws Exception {
-        String token = tokenDe("kit-http@medicore.com");
+    @DisplayName("un botiquin vacio responde 200 con lista vacia")
+    void botiquinVacioDevuelveListaVacia() throws Exception {
+        String token = tokenDe("kit-vacio-http@medicore.com");
+
+        mockMvc.perform(get(URL).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("devuelve los campos que el PDF necesita")
+    void devuelveCamposParaElPdf() throws Exception {
+        String token = tokenDe("kit-pdf@medicore.com");
         Long medicamento = medicamentoId(0);
 
         mockMvc.perform(put(URL)
@@ -88,15 +98,22 @@ class KitEndpointTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.medicineId").value(medicamento))
                 .andExpect(jsonPath("$.name").isNotEmpty())
-                .andExpect(jsonPath("$.quantity").value(2));
+                .andExpect(jsonPath("$.quantity").value(2))
+                .andExpect(jsonPath("$.dose").exists())
+                .andExpect(jsonPath("$.uses").isNotEmpty())
+                .andExpect(jsonPath("$.category").isNotEmpty())
+                .andExpect(jsonPath("$.precautions").isArray())
+                .andExpect(jsonPath("$.updatedAt").isNotEmpty());
 
         mockMvc.perform(get(URL).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").isNotEmpty())
+                .andExpect(jsonPath("$[0].uses").isNotEmpty());
     }
 
     @Test
-    @DisplayName("borra el medicamento y luego responde 404")
+    @DisplayName("borra el medicamento y el botiquin queda vacio")
     void borraYQuedaVacio() throws Exception {
         String token = tokenDe("kit-borra-http@medicore.com");
         Long medicamento = medicamentoId(0);
