@@ -42,6 +42,15 @@ public class SeasonAlert {
     @Column(length = 160)
     private String source;
 
+    @Column(length = 80)
+    private String origin;
+
+    @Column(name = "external_id", length = 160)
+    private String externalId;
+
+    @Column(name = "fetched_at")
+    private LocalDateTime fetchedAt;
+
     @Column(name = "starts_on", nullable = false)
     private LocalDate startsOn;
 
@@ -96,6 +105,15 @@ public class SeasonAlert {
 
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
+
+    public String getOrigin() { return origin; }
+    public void setOrigin(String origin) { this.origin = origin; }
+
+    public String getExternalId() { return externalId; }
+    public void setExternalId(String externalId) { this.externalId = externalId; }
+
+    public LocalDateTime getFetchedAt() { return fetchedAt; }
+    public void setFetchedAt(LocalDateTime fetchedAt) { this.fetchedAt = fetchedAt; }
 
     public LocalDate getStartsOn() { return startsOn; }
     public void setStartsOn(LocalDate startsOn) { this.startsOn = startsOn; }

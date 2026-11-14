@@ -1,6 +1,7 @@
 package com.medicore.api.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,6 +13,10 @@ import com.medicore.api.models.SeasonAlert;
 @Repository
 public interface SeasonAlertRepository extends JpaRepository<SeasonAlert, Long>,
         JpaSpecificationExecutor<SeasonAlert> {
+
+    Optional<SeasonAlert> findByOriginAndExternalId(String origin, String externalId);
+
+    List<SeasonAlert> findByOrigin(String origin);
 
     @Query("select distinct a.category from SeasonAlert a where a.category is not null order by a.category")
     List<String> findDistinctCategories();
