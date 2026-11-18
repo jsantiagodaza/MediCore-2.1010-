@@ -23,6 +23,8 @@ El issue también nombra *navegación, uso de MediCore, orientación general e h
 | `MED_NOT_FOUND` | Medicamento que no está en el catálogo | `medication_not_found` |
 | `GREETING` | Saludo | `greeting` |
 | `DRUG_INTERACTION` | Interacciones entre dos medicamentos del catálogo | `drug_interaction` |
+| `NAVIGATION` | Navegación por la app | `navigation` |
+| `APP_USAGE` | Uso de MediCore | `navigation` |
 
 ### Seguridad — siempre activas, Mol NO ayuda con esto y protege
 | ID | Intención | Categoría de API |
@@ -39,8 +41,6 @@ El issue también nombra *navegación, uso de MediCore, orientación general e h
 |---|---|---|
 | `HYDRATION` | Orientación sobre hidratación | `hydration` |
 | `FIRST_AID_KIT` | Orientación sobre el botiquín | `first_aid_kit` |
-| `NAVIGATION` | Navegación por la app | `navigation` |
-| `APP_USAGE` | Uso de MediCore | `app_usage` |
 | `SYMPTOM_ORIENTATION` | Orientación sobre síntomas | `symptom_orientation` |
 | `GENERAL_ORIENTATION` | Orientación general de salud | `general_orientation` |
 
@@ -118,6 +118,26 @@ La seguridad va **antes** que todo: «¿Cuánto ibuprofeno tomo? Me duele el pec
   - «¿Puedo tomar loratadina con omeprazol?» → `drug_interaction`
   - «Tomo un antiinflamatorio, ¿puedo tomar warfarina también?» → `interaction_clarification`
   - «¿Puedo mezclar ibuprofeno con otro medicamento?» → `interaction_clarification`
+
+#### `NAVIGATION` — Navegación por la app
+
+- **Qué es:** Preguntar dónde está una función o cómo llegar a una sección.
+- **Qué hace Mol:** Orienta sobre los cinco módulos de la plataforma; diferencia herramientas disponibles y funciones en desarrollo.
+- **Categoría de API (prototipo Node):** `navigation`
+- **Backend Spring hoy → esperado:** `NO_ENTENDIDO` → `NO_ENTENDIDO` · ✅ cumple
+- **Fuente de datos:** Base de conocimiento de la interfaz (server/assistant/platform-knowledge.js)
+- **Ejemplos (resultado en fase 1):**
+  - «¿Dónde calculo mi IMC?» → `navigation`
+
+#### `APP_USAGE` — Uso de MediCore
+
+- **Qué es:** Cómo funciona una herramienta de la app (evaluador de síntomas, calculadoras, botiquín).
+- **Qué hace Mol:** Describe el uso de las herramientas desde la base de conocimiento de la interfaz; no ejecuta acciones ni diagnostica.
+- **Categoría de API (prototipo Node):** `navigation`
+- **Backend Spring hoy → esperado:** `NO_ENTENDIDO` → `NO_ENTENDIDO` · ✅ cumple
+- **Fuente de datos:** Base de conocimiento de la interfaz (server/assistant/platform-knowledge.js)
+- **Ejemplos (resultado en fase 1):**
+  - «¿Cómo funciona el evaluador de síntomas?» → `navigation`
 
 ### 4.2 Seguridad (siempre activas)
 
@@ -217,26 +237,6 @@ La seguridad va **antes** que todo: «¿Cuánto ibuprofeno tomo? Me duele el pec
 - **Fuente de datos:** Contenido de la sección Botiquín de la app
 - **Ejemplos (resultado en fase 1):**
   - «¿Qué lleva un botiquín básico?» → `coming_soon`
-
-#### `NAVIGATION` — Navegación por la app
-
-- **Qué es:** Preguntar dónde está una función o cómo llegar a una sección.
-- **Qué hace Mol:** Aún no implementada: en fase 1 recibe la respuesta estándar de fuera de alcance.
-- **Categoría de API (prototipo Node):** `navigation`
-- **Backend Spring hoy → esperado:** `NO_ENTENDIDO` → `NO_ENTENDIDO` · ✅ cumple
-- **Fuente de datos:** Mapa de secciones de la app
-- **Ejemplos (resultado en fase 1):**
-  - «¿Dónde calculo mi IMC?» → `out_of_scope`
-
-#### `APP_USAGE` — Uso de MediCore
-
-- **Qué es:** Cómo funciona una herramienta de la app (evaluador de síntomas, calculadoras, botiquín).
-- **Qué hace Mol:** Aún no implementada: en fase 1 recibe la respuesta estándar de fuera de alcance.
-- **Categoría de API (prototipo Node):** `app_usage`
-- **Backend Spring hoy → esperado:** `NO_ENTENDIDO` → `NO_ENTENDIDO` · ✅ cumple
-- **Fuente de datos:** Ayuda de la app
-- **Ejemplos (resultado en fase 1):**
-  - «¿Cómo funciona el evaluador de síntomas?» → `out_of_scope`
 
 #### `SYMPTOM_ORIENTATION` — Orientación sobre síntomas
 

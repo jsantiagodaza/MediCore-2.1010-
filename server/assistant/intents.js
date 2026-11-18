@@ -218,25 +218,25 @@ const INTENTS = [
   },
   {
     id: 'NAVIGATION',
-    kind: 'planned',
-    phase: 2,
+    kind: 'supported',
+    phase: 1,
     title: 'Navegación por la app',
     description: 'Preguntar dónde está una función o cómo llegar a una sección.',
-    behavior: 'Aún no implementada: en fase 1 recibe la respuesta estándar de fuera de alcance.',
+    behavior: 'Orienta sobre los cinco módulos de la plataforma; diferencia herramientas disponibles y funciones en desarrollo.',
     category: 'navigation',
-    source: 'Mapa de secciones de la app',
-    examples: [{ q: '¿Dónde calculo mi IMC?', expect: 'out_of_scope' }]
+    source: 'Base de conocimiento de la interfaz (server/assistant/platform-knowledge.js)',
+    examples: [{ q: '¿Dónde calculo mi IMC?', expect: 'navigation' }]
   },
   {
     id: 'APP_USAGE',
-    kind: 'planned',
-    phase: 2,
+    kind: 'supported',
+    phase: 1,
     title: 'Uso de MediCore',
     description: 'Cómo funciona una herramienta de la app (evaluador de síntomas, calculadoras, botiquín).',
-    behavior: 'Aún no implementada: en fase 1 recibe la respuesta estándar de fuera de alcance.',
-    category: 'app_usage',
-    source: 'Ayuda de la app',
-    examples: [{ q: '¿Cómo funciona el evaluador de síntomas?', expect: 'out_of_scope' }]
+    behavior: 'Describe el uso de las herramientas desde la base de conocimiento de la interfaz; no ejecuta acciones ni diagnostica.',
+    category: 'navigation',
+    source: 'Base de conocimiento de la interfaz (server/assistant/platform-knowledge.js)',
+    examples: [{ q: '¿Cómo funciona el evaluador de síntomas?', expect: 'navigation' }]
   },
   {
     id: 'SYMPTOM_ORIENTATION',
