@@ -1,6 +1,5 @@
 /* ==========================================================================
-   MediCore — Design System & Morphology based on Calendly.com Style Reference
-   "Navy ink on cool marble."
+   MediCore — Design System 
    ========================================================================== */
 
 :root {
@@ -704,7 +703,7 @@ h3 {
 }
 
 /* ==========================================================================
-   Trust / Proof Strip (Calendly Monochrome Band)
+   Trust / Proof Strip 
    ========================================================================== */
 .trust-strip {
   background: var(--color-paper);
@@ -1324,7 +1323,9 @@ h3 {
 }
 
 .sym .ic {
-  font-size: 20px;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
   flex-shrink: 0;
 }
 

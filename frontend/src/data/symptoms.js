@@ -1,9 +1,23 @@
+// frontend/src/data/symptoms.js
 export const SYMPTOMS = [
-  {e:'🔥',n:'Fiebre'},{e:'🤕',n:'Dolor de cabeza'},{e:'🤢',n:'Náuseas'},{e:'😫',n:'Malestar general'},
-  {e:'😮‍💨',n:'Tos'},{e:'🤧',n:'Congestión nasal'},{e:'💪',n:'Dolor muscular'},{e:'🥶',n:'Escalofríos'},
-  {e:'😔',n:'Dolor de garganta'},{e:'🫃',n:'Dolor de estómago'},{e:'💩',n:'Diarrea'},{e:'😵',n:'Mareos'},
-  {e:'🤮',n:'Vómito'},{e:'😮‍💨',n:'Mucosidad / flema'},{e:'👁️',n:'Ojos llorosos o rojos'},{e:'🤧',n:'Estornudos frecuentes'}
+  { img: '/assets/iconos-me-siento-mal/fiebre.png', n: 'Fiebre' },
+  { img: '/assets/iconos-me-siento-mal/dolor-de-cabeza.png', n: 'Dolor de cabeza' },
+  { img: '/assets/iconos-me-siento-mal/nauseas.png', n: 'Náuseas' },
+  { img: '/assets/iconos-me-siento-mal/malestar-general.png', n: 'Malestar general' },
+  { img: '/assets/iconos-me-siento-mal/Tos.png', n: 'Tos' },
+  { img: '/assets/iconos-me-siento-mal/Congestion-nasal.png', n: 'Congestión nasal' },
+  { img: '/assets/iconos-me-siento-mal/dolor-muscular.png', n: 'Dolor muscular' },
+  { img: '/assets/iconos-me-siento-mal/Escalofrios.png', n: 'Escalofríos' },
+  { img: '/assets/iconos-me-siento-mal/dolor-de-garganta.png', n: 'Dolor de garganta' },
+  { img: '/assets/iconos-me-siento-mal/dolor-de-estomago.png', n: 'Dolor de estómago' },
+  { img: '/assets/iconos-me-siento-mal/diarrea.png', n: 'Diarrea' },
+  { img: '/assets/iconos-me-siento-mal/mareos.png', n: 'Mareos' },
+  { img: '/assets/iconos-me-siento-mal/Vomitos.png', n: 'Vómito' },
+  { img: '/assets/iconos-me-siento-mal/flemas.png', n: 'Mucosidad / flema' },
+  { img: '/assets/iconos-me-siento-mal/ojos-llorosos.png', n: 'Ojos llorosos o rojos' },
+  { img: '/assets/iconos-me-siento-mal/estornudos-frecuentes.png', n: 'Estornudos frecuentes' }
 ];
+
 export const DIAGNOSES = [
  {cond:['Fiebre','Tos','Congestión nasal','Malestar general','Dolor muscular','Escalofríos'],dx:'Gripe (influenza)',pct:89,sev:'leve',color:'leve',rec_med:['Acetaminofén','Ibuprofeno'],rec_casa:['Reposo','Hidratación','Vapor de agua'],warn:'Si la fiebre supera 39°C o no cede en 3 días, consulta a un médico.',dico:'Parece una gripe común. Con reposo y buena hidratación deberías mejorar en unos días.'},
   {cond:['Tos','Congestión nasal','Dolor de garganta','Mucosidad / flema'],dx:'Resfriado común',pct:85,sev:'leve',color:'leve',rec_med:['Ambroxol','Solución salina','Vitamina C'],rec_casa:['Reposo','Agua caliente con miel','Vaporización'],warn:'Si persiste más de 10 días o aparece fiebre alta, consulta al médico.',dico:'Parece un resfriado de los de siempre. Agua, descanso y paciencia.'},
