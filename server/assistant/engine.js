@@ -3,6 +3,7 @@ const { classifySafety, normalize, hasStopVerb } = require('./safety');
 const { loadCatalog, findMedication, findSymptoms, isPrescriptionOnly, SOURCES } = require('./knowledge');
 const { isActive, scopeFromEnv, SCOPE } = require('./intents');
 const { platformReply } = require('./platform-knowledge');
+const { scopeReply } = require('./scope-filters');
 const { interactionAnswer, needsProfessionalOnly } = require('./interactions');
 
 const catalog = loadCatalog();
@@ -192,6 +193,9 @@ function controlledReply(message, scope = SCOPE.PHASE1, history = []) {
   const med = findMedication(message, catalog.meds);
   // «Quiero dejar la metformina»: verbo de suspensión + medicamento del catálogo (issue #65)
   if (med && hasStopVerb(message)) return treatmentChange();
+  // Issue #80: declinar temas ajenos y funciones inexistentes, sin interferir con seguridad.
+  const outside = scopeReply(message);
+  if (outside) return outside;
   // Conocimiento de la plataforma (issue #78); la seguridad conserva prioridad.
   const platform = platformReply(message, history);
   if (platform) return platform;
