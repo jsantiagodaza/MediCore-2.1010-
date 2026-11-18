@@ -175,7 +175,7 @@ function fallback() {
  * o cuando la salida de la IA incumple el filtro de seguridad.
  * `scope` define qué intenciones están activas (ver intents.js). Por defecto: fase 1.
  */
-function controlledReply(message, scope = SCOPE.PHASE1) {
+function controlledReply(message, scope = SCOPE.PHASE1, history = []) {
   switch (classifySafety(message)) {
     case 'emergency': return emergency();
     case 'self_harm': return selfHarm();
@@ -193,11 +193,16 @@ function controlledReply(message, scope = SCOPE.PHASE1) {
   // «Quiero dejar la metformina»: verbo de suspensión + medicamento del catálogo (issue #65)
   if (med && hasStopVerb(message)) return treatmentChange();
   // Conocimiento de la plataforma (issue #78); la seguridad conserva prioridad.
-  const platform = platformReply(message);
+  const platform = platformReply(message, history);
   if (platform) return platform;
   if (med) return COMMERCIAL.test(norm) ? commercial() : medicationInfo(med);
   const topic = generalTopics(message, scope);
-  if (topic) return topic;
+  if (topic) {
+    if (topic.category === 'greeting' && Array.isArray(history) && history.length > 0) {
+      return build('greeting', 'ok', '¡Hola de nuevo! ¿Quieres continuar con lo que estábamos viendo o consultar otra herramienta de MediCore?');
+    }
+    return topic;
+  }
   if (MED_QUESTION.test(norm)) return notFound();
   return fallback();
 }

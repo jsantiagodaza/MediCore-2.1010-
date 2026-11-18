@@ -44,37 +44,68 @@ const MODULES = Object.freeze({
 function normalizeText(value) {
   return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
-const NAVIGATION = /(?:donde|como|cual|que|para que|explica|explicame|mostrar|muestrame|encontrar|ir a|entrar|abrir|acceder|usar|funciona|sirve|hacer|ayuda|herramientas|apartado|seccion|modulo|funciones|opciones|puedo|guia|navegar|conocer)/;
-const PLATFORM = /(?:medicore|plataforma|aplicacion|app|modulos|apartados|secciones)/;
-function findPlatformTopic(message) {
-  const text = normalizeText(message);
-  if (!text) return null;
-  // La información sanitaria general no es una solicitud de navegación.
-  // Mantener los contratos de HYDRATION, FIRST_AID_KIT y MED_NOT_FOUND.
-  if (/\b(?:que (?:lleva|debe llevar|contiene|incluye) (?:un |el |mi )?botiquin|que (?:poner|guardar) en (?:un |el |mi )?botiquin)\b/.test(text)) return null;
-  if (/\bpara que sirven? (?:estos|los|mis|esos) medicamentos\b/.test(text)) return null;
-  // Evitar interferir con preguntas clínicas: «¿para qué sirve ibuprofeno?».
-  // Para hidratación/botiquín, distinguir uso de interfaz de orientación sanitaria.
-  const isNavigation = NAVIGATION.test(text) || PLATFORM.test(text);
-  if (!isNavigation) return null;
+// Reconoce la intención de uso de la interfaz sin confundirla con consejos clínicos.
+const NAVIGATION = /\b(?:donde|como|cual|que|para que|explica|explicame|muestra|muestrame|encontrar|abrir|acceder|usar|funciona|sirve|herramientas|apartado|seccion|modulo|funciones|opciones|guia|navegar|conocer)\b/;
+const PLATFORM = /\b(?:medicore|plataforma|aplicacion|app|modulos|apartados|secciones)\b/;
+const FOLLOW_UP = /^(?:y )?(?:como (?:lo|la|se) (?:uso|utiliza|hago|encuentro)|donde (?:lo|la) (?:encuentro|abro)|que (?:mas )?(?:puedo hacer|opciones tiene)|para que sirve|explicame (?:mas|eso)|y (?:sus )?funciones|y eso como funciona)[ ?!.]*$/;
+
+function explicitTopic(text) {
   if (/(?:que modulos|cuales son los modulos|que apartados|que secciones|que puedo hacer en medicore|como funciona medicore|que es medicore)/.test(text)) return 'overview';
   for (const [id, mod] of Object.entries(MODULES)) {
-    if (mod.aliases.some(alias => text.includes(alias))) return id;
+    if (mod.aliases.some(alias => new RegExp('(?:^|\\s)' + normalizeText(alias).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:$|\\s)').test(text))) return id;
   }
   return null;
 }
-function platformReply(message) {
-  const id = findPlatformTopic(message);
+
+// Un historial explícito evita mezclar conversaciones entre usuarios en el servidor.
+// Los elementos pueden ser cadenas o {role, content}; solo se consultan mensajes del usuario.
+function lastPlatformTopic(history) {
+  if (!Array.isArray(history)) return null;
+  for (const item of history.slice(-12).reverse()) {
+    const value = typeof item === 'string' ? item : (item && item.role === 'user' ? item.content : null);
+    if (typeof value !== 'string') continue;
+    const topic = explicitTopic(normalizeText(value));
+    if (topic && topic !== 'overview') return topic;
+  }
+  return null;
+}
+function findPlatformTopic(message, history = []) {
+  const text = normalizeText(message);
+  if (!text) return null;
+  // Una petición sanitaria NO se transforma en una pregunta sobre la plataforma.
+  if (/\b(?:que (?:lleva|debe llevar|contiene|incluye) (?:un |el |mi )?botiquin|que (?:poner|guardar) en (?:un |el |mi )?botiquin)\b/.test(text)) return null;
+  if (/\bpara que sirven? (?:estos|los|mis|esos) medicamentos\b/.test(text)) return null;
+  const explicit = explicitTopic(text);
+  if (explicit) return explicit;
+  if (FOLLOW_UP.test(text)) return lastPlatformTopic(history);
+  return null;
+}
+
+function responseMode(message) {
+  const text = normalizeText(message);
+  if (/\b(?:donde|abrir|acceder|encontrar|ir a|entrar)\b/.test(text)) return 'steps';
+  if (/\b(?:como|usar|utiliza|pasos|hago)\b/.test(text)) return 'steps';
+  if (/\b(?:funciones|opciones|herramientas|que puedo hacer|incluye)\b/.test(text)) return 'features';
+  return 'overview';
+}
+function platformReply(message, history = []) {
+  const id = findPlatformTopic(message, history);
   if (!id) return null;
   if (id === 'overview') return {
     category: 'navigation', safety: { level: 'ok', flags: [] },
-    reply: 'En MediCore tienes «Cuídate» (IMC e hidratación), «Medicamentos» (catálogo), «Me siento mal» (orientación de síntomas), «Prepárate» (funciones en desarrollo y acceso al botiquín) y «Botiquín Esencial» (listas de verificación por situación). Selecciona cualquiera de estos apartados en el menú superior. También puedes preguntarme cómo usar uno de ellos.',
-    sources: [], suggested_actions: ['Abrir el menú de MediCore']
+    reply: 'MediCore está organizado en cinco apartados: «Cuídate» (IMC e hidratación), «Medicamentos» (catálogo informativo), «Me siento mal» (orientación sobre síntomas), «Prepárate» (prevención y acceso al botiquín) y «Botiquín Esencial» (listas de verificación). Puedes abrirlos desde el menú superior. Por ejemplo, si deseas consultar tu IMC, entra en «Cuídate» y selecciona la calculadora. ¿Sobre cuál te gustaría saber más?',
+    sources: [], suggested_actions: ['Explorar Cuídate', 'Explorar Botiquín']
   };
   const module = MODULES[id];
+  const mode = responseMode(message);
+  const detail = mode === 'steps'
+    ? `Para utilizarlo: ${module.steps} ${module.limitations}`
+    : mode === 'features'
+      ? `${module.about} Para empezar: ${module.steps} ${module.limitations}`
+      : `${module.about} ${module.limitations} Si quieres usarlo, ${module.steps.charAt(0).toLowerCase() + module.steps.slice(1)}`;
   return {
     category: 'navigation', safety: { level: 'ok', flags: [] },
-    reply: `${module.title}: ${module.about}\n\nCómo usarlo: ${module.steps}\n\nImportante: ${module.limitations}`,
+    reply: `${module.title}: ${detail}`,
     sources: [], suggested_actions: [`Abrir ${module.title}`]
   };
 }
