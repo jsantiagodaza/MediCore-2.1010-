@@ -1,52 +1,53 @@
 // frontend/src/pages/Preparate.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MOCK_ALERTAS, CIUDADES_DISPONIBLES, CATEGORIAS_DISPONIBLES } from '../data/alertas-mock';
+import { fetchAlerts } from '../api/alerts';
 import ModalCalendarioAlerta from '../components/ModalCalendarioAlerta';
 
 export default function Preparate() {
-  const [alertas, setAlertas] = useState(null);
+  const [alertas, setAlertas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Estado para el modal del calendario
   const [alertaSeleccionada, setAlertaSeleccionada] = useState(null);
 
-  // Filtros
+  // Filtros locales
   const [ciudadFiltro, setCiudadFiltro] = useState('Todas');
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas');
 
-  // Simulamos la carga de la API
   useEffect(() => {
-    const cargarAlertas = async () => {
-      setCargando(true);
-      setError(null);
-      try {
-        // Simulamos un retraso de 1 segundo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setAlertas(MOCK_ALERTAS);
-      } catch (err) {
-        setError('No se pudieron cargar las alertas. Intenta de nuevo.');
-      } finally {
+    const control = new AbortController();
+    setCargando(true);
+    setError(null);
+
+    fetchAlerts({ signal: control.signal })
+      .then(data => {
+        // Asumiendo que el backend devuelve un array directo. 
+        // Si devuelve { alertas: [...] }, cámbialo a setAlertas(data.alertas || [])
+        setAlertas(data);
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        setError(err.message || 'No se pudieron cargar las alertas. Verifica que el backend esté corriendo y el CORS configurado.');
+      })
+      .finally(() => {
         setCargando(false);
-      }
-    };
-    cargarAlertas();
+      });
+
+    return () => control.abort();
   }, []);
 
-  // Lógica de filtrado
-  const alertasFiltradas = (alertas || []).filter(alerta => {
-    const matchCiudad = ciudadFiltro === 'Todas' || alerta.ciudad === ciudadFiltro;
-    const matchCategoria = categoriaFiltro === 'todas' || alerta.categoria === categoriaFiltro;
+  const alertasFiltradas = alertas.filter(a => {
+    const matchCiudad = ciudadFiltro === 'Todas' || a.city === ciudadFiltro;
+    const matchCategoria = categoriaFiltro === 'todas' || a.category?.toLowerCase() === categoriaFiltro;
     return matchCiudad && matchCategoria;
   });
 
-  // Colores por nivel de riesgo
   const getRiskStyles = (nivel) => {
-    switch (nivel) {
-      case 'alto': return { bg: '#fee2e2', color: '#991b1b', border: '#fecaca', label: 'Riesgo Alto' };
-      case 'medio': return { bg: '#fffbeb', color: '#b45309', border: '#fde68a', label: 'Riesgo Medio' };
-      case 'bajo': return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', label: 'Riesgo Bajo' };
+    // El backend envía los niveles en MAYÚSCULAS (ALTO, MEDIO, BAJO)
+    switch (nivel?.toUpperCase()) {
+      case 'ALTO': return { bg: '#fee2e2', color: '#991b1b', border: '#fecaca', label: 'Riesgo Alto' };
+      case 'MEDIO': return { bg: '#fffbeb', color: '#b45309', border: '#fde68a', label: 'Riesgo Medio' };
+      case 'BAJO': return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', label: 'Riesgo Bajo' };
       default: return { bg: '#f8f9fb', color: '#476788', border: '#d4e0ed', label: 'Informativo' };
     }
   };
@@ -55,7 +56,6 @@ export default function Preparate() {
     <section className="screen on" id="s-prep" style={{ paddingTop: '120px' }}>
       <div className="wrap">
         
-        {/* Encabezado de la Sección */}
         <div className="section-header">
           <span className="kicker"><span className="kicker-dot"></span> Prevención y Cuidado</span>
           <h2>Alertas por Temporada</h2>
@@ -64,7 +64,6 @@ export default function Preparate() {
           </p>
         </div>
 
-        {/* Panel de Filtros y Preferencias */}
         <div className="alertas-toolbar">
           <div className="alertas-filters">
             <select 
@@ -72,28 +71,22 @@ export default function Preparate() {
               value={ciudadFiltro} 
               onChange={(e) => setCiudadFiltro(e.target.value)}
             >
-              {CIUDADES_DISPONIBLES.map(c => <option key={c} value={c}>{c === 'Todas' ? '📍 Todas las ciudades' : c}</option>)}
+              <option value="Todas">📍 Todas las ciudades</option>
+              {/* Extraemos las ciudades únicas de las alertas */}
+              {[...new Set(alertas.map(a => a.city).filter(Boolean))].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
 
             <div className="alertas-cat-chips">
-              {CATEGORIAS_DISPONIBLES.map(cat => (
-                <button
-                  key={cat.id}
-                  className={`alertas-chip ${categoriaFiltro === cat.id ? 'active' : ''}`}
-                  onClick={() => setCategoriaFiltro(cat.id)}
-                >
-                  {cat.icon} {cat.label}
-                </button>
-              ))}
+              <button className={`alertas-chip ${categoriaFiltro === 'todas' ? 'active' : ''}`} onClick={() => setCategoriaFiltro('todas')}>🌍 Todas</button>
+              <button className={`alertas-chip ${categoriaFiltro === 'clima' ? 'active' : ''}`} onClick={() => setCategoriaFiltro('clima')}>⛅ Clima</button>
+              <button className={`alertas-chip ${categoriaFiltro === 'salud' ? 'active' : ''}`} onClick={() => setCategoriaFiltro('salud')}>🩺 Salud</button>
+              <button className={`alertas-chip ${categoriaFiltro === 'ambiental' ? 'active' : ''}`} onClick={() => setCategoriaFiltro('ambiental')}>🌿 Ambiental</button>
             </div>
           </div>
-          
-          <button className="btn btn-outline btn-sm" onClick={() => alert('Configuración de preferencias de notificación (Próximamente)')}>
-            ⚙️ Preferencias
-          </button>
         </div>
 
-        {/* Estados de Carga, Error y Vacío */}
         {cargando ? (
           <div className="empty">
             <img src="/assets/mol.png" alt="Cargando" className="mol-empty float" style={{ opacity: 0.5 }} />
@@ -117,10 +110,9 @@ export default function Preparate() {
             </button>
           </div>
         ) : (
-          /* Grid de Alertas */
           <div className="alertas-grid">
             {alertasFiltradas.map(alerta => {
-              const risk = getRiskStyles(alerta.nivelRiesgo);
+              const risk = getRiskStyles(alerta.riskLevel);
               return (
                 <div 
                   key={alerta.id} 
@@ -129,7 +121,7 @@ export default function Preparate() {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="alerta-header">
-                    <span className="alerta-ciudad">📍 {alerta.ciudad}</span>
+                    <span className="alerta-ciudad">📍 {alerta.city || 'Nacional'}</span>
                     <span 
                       className="alerta-risk-badge" 
                       style={{ backgroundColor: risk.bg, color: risk.color, border: `1px solid ${risk.border}` }}
@@ -138,24 +130,13 @@ export default function Preparate() {
                     </span>
                   </div>
                   
-                  <h3 className="alerta-title">{alerta.titulo}</h3>
-                  <p className="alerta-desc">{alerta.descripcion}</p>
+                  <h3 className="alerta-title">{alerta.title}</h3>
+                  <p className="alerta-desc">{alerta.description}</p>
                   
-                  <div className="alerta-recomendaciones">
-                    <strong>Recomendaciones:</strong>
-                    <ul>
-                      {alerta.recomendaciones.map((rec, i) => (
-                        <li key={i}>{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="alerta-footer">
+                  <div className="alerta-footer" style={{ marginTop: 'auto' }}>
                     <div className="alerta-meta">
-                      <span>Fuente: {alerta.fuente}</span>
-                      <span>Actualizado: {alerta.fechaActualizacion}</span>
+                      <span>Fuente: {alerta.source}</span>
                     </div>
-                    {/* Aviso visual para el usuario */}
                     <span className="alerta-vigencia">📅 Ver calendario</span>
                   </div>
                 </div>
@@ -164,7 +145,6 @@ export default function Preparate() {
           </div>
         )}
 
-        {/* Tarjeta de Botiquín */}
         <div className="prep-features" style={{ marginTop: '64px' }}>
           <div className="prep-card" style={{ gridColumn: '1 / -1', textAlign: 'center', background: '#f0f7ff', borderColor: 'var(--color-signal-blue)' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>🎒</div>
@@ -178,7 +158,6 @@ export default function Preparate() {
 
       </div>
 
-      {/* MODAL CALENDARIO */}
       <ModalCalendarioAlerta 
         alerta={alertaSeleccionada} 
         onClose={() => setAlertaSeleccionada(null)} 

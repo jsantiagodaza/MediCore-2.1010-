@@ -3,21 +3,16 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export default function ModalCalendarioAlerta({ alerta, onClose }) {
-  // Iniciamos en el mes actual por defecto
   const [currentDate, setCurrentDate] = useState(new Date()); 
 
-  // Efecto para posicionar el calendario en el mes de la alerta automáticamente
+  // Efecto para posicionar el calendario en el mes de inicio de la alerta
   useEffect(() => {
-    if (alerta && alerta.fechasAfectadas && alerta.fechasAfectadas.length > 0) {
-      // Ordenamos las fechas para encontrar la primera
-      const sortedDates = [...alerta.fechasAfectadas].sort();
-      const firstDateStr = sortedDates[0]; // Formato YYYY-MM-DD
-      const [y, m, d] = firstDateStr.split('-').map(Number);
-      // m - 1 porque en JS los meses van de 0 a 11
+    if (alerta && alerta.startsOn) {
+      // startsOn viene en formato 'YYYY-MM-DD'
+      const [y, m, d] = alerta.startsOn.split('-').map(Number);
       setCurrentDate(new Date(y, m - 1, 1));
     } else {
-      // Si no hay fechas, volvemos a Noviembre 2026 (mes de nuestros mocks)
-      setCurrentDate(new Date(2026, 10, 1));
+      setCurrentDate(new Date());
     }
   }, [alerta]);
 
@@ -28,27 +23,48 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
 
   if (!alerta) return null;
 
+  // Generar array de fechas afectadas entre startsOn y endsOn
+  const getFechasAfectadas = () => {
+    if (!alerta.startsOn || !alerta.endsOn) return [];
+    
+    const fechas = [];
+    // Usamos T00:00:00 para evitar problemas de zona horaria
+    let current = new Date(`${alerta.startsOn}T00:00:00`);
+    const end = new Date(`${alerta.endsOn}T00:00:00`);
+
+    while (current <= end) {
+      // Formatear a YYYY-MM-DD
+      const y = current.getFullYear();
+      const m = String(current.getMonth() + 1).padStart(2, '0');
+      const d = String(current.getDate()).padStart(2, '0');
+      fechas.push(`${y}-${m}-${d}`);
+      
+      current.setDate(current.getDate() + 1);
+    }
+    return fechas;
+  };
+
+  const fechasAfectadas = getFechasAfectadas();
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   
-  // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
   const firstDayOfMonth = new Date(year, month, 1).getDay();
-  // Ajustamos para que la semana empiece en Lunes (0 = Lunes, 6 = Domingo)
   const emptyCells = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
   const getRiskColors = (nivel) => {
-    switch (nivel) {
-      case 'alto': return { bg: '#fee2e2', color: '#991b1b', border: '#fecaca' };
-      case 'medio': return { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
-      case 'bajo': return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
+    switch (nivel?.toUpperCase()) {
+      case 'ALTO': return { bg: '#fee2e2', color: '#991b1b', border: '#fecaca' };
+      case 'MEDIO': return { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
+      case 'BAJO': return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
       default: return { bg: '#f8f9fb', color: '#476788', border: '#d4e0ed' };
     }
   };
-  const risk = getRiskColors(alerta.nivelRiesgo);
+  const risk = getRiskColors(alerta.riskLevel);
 
   return createPortal(
     <div className="overlay" onClick={onClose}>
@@ -56,8 +72,8 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
         
         <div className="calendario-header">
           <div>
-            <h3 style={{ fontSize: '22px', marginBottom: '4px', color: 'var(--color-ink-navy)' }}>{alerta.titulo}</h3>
-            <p style={{ fontSize: '14px', color: 'var(--color-slate-gray)' }}>📍 {alerta.ciudad} · {alerta.fuente}</p>
+            <h3 style={{ fontSize: '22px', marginBottom: '4px', color: 'var(--color-ink-navy)' }}>{alerta.title}</h3>
+            <p style={{ fontSize: '14px', color: 'var(--color-slate-gray)' }}>📍 {alerta.city || 'Nacional'} · {alerta.source}</p>
           </div>
           <button className="close" onClick={onClose} style={{ position: 'static' }}>✕</button>
         </div>
@@ -69,22 +85,20 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
             <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))}>&gt;</button>
           </div>
 
-          {alerta.fechasAfectadas && alerta.fechasAfectadas.length > 0 ? (
+          {fechasAfectadas.length > 0 ? (
             <div className="calendario-grid">
               {daysOfWeek.map(day => (
                 <div key={day} className="calendario-dow">{day}</div>
               ))}
 
-              {/* Celdas vacías invisibles */}
               {Array.from({ length: emptyCells }).map((_, i) => (
-                <div key={`empty-${i}`} className="calendario-day calendario-day--vacio"></div>
+                <div key={`empty-${i}`} className="calendario-day empty"></div>
               ))}
 
-              {/* Días del mes */}
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const dayNumber = i + 1;
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-                const isAffected = alerta.fechasAfectadas?.includes(dateString);
+                const isAffected = fechasAfectadas.includes(dateString);
 
                 return (
                   <div 
@@ -113,10 +127,6 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
               <span className="calendario-leyenda-box" style={{ backgroundColor: risk.bg, border: `1px solid ${risk.border}` }}></span>
               Días afectados por esta alerta
             </div>
-            <div className="calendario-leyenda-item">
-              <span className="calendario-leyenda-box" style={{ backgroundColor: '#ffffff', border: '1px solid var(--color-hairline)' }}></span>
-              Días sin alerta
-            </div>
           </div>
         </div>
 
@@ -124,5 +134,4 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
     </div>,
     document.body
   );
-  
 }
