@@ -124,4 +124,5 @@ export default function ModalCalendarioAlerta({ alerta, onClose }) {
     </div>,
     document.body
   );
+  
 }

@@ -87,7 +87,8 @@ export default function MeSientoMal() {
                     className={`sym ${seleccionados.includes(s.n) ? 'sel' : ''}`}
                     onClick={() => toggleSintoma(s.n)}
                   >
-                    <span className="ic">{s.e}</span>
+                    {/* NUEVO: Usamos la etiqueta img */}
+                    <img className="ic" src={s.img} alt={s.n} />
                     <span className="sym-name">{s.n}</span>
                     <span className="ck">{seleccionados.includes(s.n) ? '✓' : ''}</span>
                   </button>

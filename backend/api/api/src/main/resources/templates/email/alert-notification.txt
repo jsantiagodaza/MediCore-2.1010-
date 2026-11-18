@@ -1,0 +1,22 @@
+MediCore - Alerta de temporada
+========================================
+
+Hola {{nombre}},
+
+{{titulo}}
+
+{{descripcion}}
+
+Categoria: {{categoria}}
+Ubicacion: {{ubicacion}}
+Vigencia: {{vigencia}}
+Fuente: {{fuente}}
+Nivel de riesgo: {{riesgo}}
+
+Recibes este correo porque configuraste tus preferencias de alertas en
+MediCore. Puedes cambiarlas o desactivarlas cuando quieras desde la app.
+
+----------------------------------------
+MediCore - Informacion de salud publica para tu municipio
+Este mensaje es informativo y no reemplaza la consulta medica.
+(c) {{anio}} MediCore
