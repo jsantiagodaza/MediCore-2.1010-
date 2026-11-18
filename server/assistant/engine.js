@@ -8,7 +8,7 @@ const { interactionAnswer, needsProfessionalOnly } = require('./interactions');
 const catalog = loadCatalog();
 
 const DISCLAIMER =
-  'Prototipo informativo de MediCore. No es un médico, no diagnostica ni receta. Ante dudas o síntomas, consulta a un profesional de la salud.';
+  'Mol ofrece información general de salud y orientación sobre MediCore. Sus respuestas no sustituyen una evaluación médica: no establece diagnósticos ni prescribe tratamientos. Ante dudas clínicas, consulta a un profesional de la salud.';
 
 const S = (...keys) => keys.map((k) => SOURCES[k]);
 
@@ -102,7 +102,7 @@ function prescription(message) {
 }
 
 function medicationInfo(m) {
-  return build('medication_info', 'ok', `${medSummary(m)}\nEs información general del catálogo de MediCore (prototipo, sin revisión clínica): puede estar incompleta. Confírmala siempre en el prospecto o con un farmacéutico.`, {
+  return build('medication_info', 'ok', `${medSummary(m)}\nEsta ficha contiene información general del catálogo de MediCore y puede estar incompleta. Confírmala siempre en el prospecto o con un farmacéutico.`, {
     sources: S('catalog', 'medline'),
     actions: ['Consultar a un farmacéutico o médico antes de usarlo']
   });
@@ -112,15 +112,25 @@ function comingSoon(intentId, topic, section) {
   return build(
     'coming_soon',
     'ok',
-    `Por ahora solo puedo ayudarte con información de los medicamentos del catálogo de MediCore. ${topic} estará disponible en una próxima versión. Mientras tanto, puedes visitar la sección “${section}” de la app.`,
+    `Puedes explorar la sección “${section}” en MediCore. ${topic} no forma parte de las respuestas que puedo ofrecer directamente en este momento. Si necesitas orientación sobre el uso de las herramientas de la plataforma, dime qué deseas hacer.`,
     { flags: [`planned_intent:${intentId}`], actions: [`Abrir la sección ${section}`] }
   );
 }
 
 function generalTopics(message, scope) {
   const t = normalize(message);
-  if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey)\b/.test(t))
-    return build('greeting', 'ok', 'Hola, soy Mol Paramédico, el asistente informativo de MediCore (prototipo). Puedo darte información general sobre los medicamentos del catálogo (para qué sirven, cuándo se usan y sus precauciones) y orientarte sobre posibles interacciones entre dos medicamentos. No diagnostico ni receto.');
+  const greeting = t.replace(/^[¡!¿?\s]+|[¡!¿?\s]+$/g, '');
+  // Saludar solo ante un saludo aislado. Una pregunta posterior al saludo
+  // debe atenderse por su intención (medicamentos, navegación, seguridad, etc.).
+  if (/^(hola|holi|buenas|buenos dias|buenas tardes|buenas noches|hey|que tal|quien eres|como te llamas|presentate)$/.test(greeting)) {
+    const intro = 'Soy Mol, el asistente virtual de MediCore. Estoy aquí para ayudarte a resolver dudas generales sobre salud y orientarte en las herramientas de nuestra plataforma.';
+    const opening = /^(buenos dias|buenas tardes|buenas noches)$/.test(greeting)
+      ? '¡' + message.trim().replace(/[¡!¿?]/g, '') + '!'
+      : '¡Hola! ¿Cómo estás?';
+    return build('greeting', 'ok', `${opening} ${intro} ¿Qué te gustaría consultar hoy?`, {
+      actions: ['Conocer los módulos de MediCore', 'Consultar un medicamento']
+    });
+  }
   if (/agua|hidrat/.test(t)) {
     if (!isActive('HYDRATION', scope)) return comingSoon('HYDRATION', 'La orientación sobre hidratación', 'Cuídate → Agua');
     return build('hydration', 'ok', 'Mantenerte hidratado ayuda a tu cuerpo a funcionar bien. La necesidad de agua cambia con la edad, el clima, la actividad física y algunas condiciones de salud. En la sección “Cuídate → Agua” de MediCore puedes calcular una meta orientativa. Si tienes una condición médica con restricción de líquidos, sigue la indicación de tu médico.', { sources: S('oms'), actions: ['Abrir la calculadora de hidratación'] });
@@ -155,7 +165,7 @@ function fallback() {
   return build(
     'out_of_scope',
     'ok',
-    'Por ahora (prototipo) solo puedo darte información general sobre los medicamentos del catálogo de MediCore: para qué sirven, cuándo se usan y sus precauciones. No diagnostico ni receto. Prueba preguntando, por ejemplo: “¿Para qué sirve la loratadina?”.',
+    'Puedo ayudarte a conocer las herramientas de MediCore y consultar información general sobre medicamentos. ¿Quieres explorar algún módulo o preguntar por un medicamento específico? Por ejemplo: «¿Dónde calculo mi IMC?» o «¿Para qué sirve la loratadina?».',
     { actions: ['Reformular la pregunta', 'Consultar a un profesional de la salud'] }
   );
 }
