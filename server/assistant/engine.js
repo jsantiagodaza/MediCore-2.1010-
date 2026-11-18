@@ -2,6 +2,7 @@
 const { classifySafety, normalize, hasStopVerb } = require('./safety');
 const { loadCatalog, findMedication, findSymptoms, isPrescriptionOnly, SOURCES } = require('./knowledge');
 const { isActive, scopeFromEnv, SCOPE } = require('./intents');
+const { platformReply } = require('./platform-knowledge');
 const { interactionAnswer, needsProfessionalOnly } = require('./interactions');
 
 const catalog = loadCatalog();
@@ -181,6 +182,9 @@ function controlledReply(message, scope = SCOPE.PHASE1) {
   const med = findMedication(message, catalog.meds);
   // «Quiero dejar la metformina»: verbo de suspensión + medicamento del catálogo (issue #65)
   if (med && hasStopVerb(message)) return treatmentChange();
+  // Conocimiento de la plataforma (issue #78); la seguridad conserva prioridad.
+  const platform = platformReply(message);
+  if (platform) return platform;
   if (med) return COMMERCIAL.test(norm) ? commercial() : medicationInfo(med);
   const topic = generalTopics(message, scope);
   if (topic) return topic;
