@@ -48,6 +48,7 @@ export default function Header() {
           <NavLink to="/mal" className={({ isActive }) => isActive ? 'on' : ''}>Me siento mal</NavLink>
           <NavLink to="/botiquin" className={({ isActive }) => isActive ? 'on' : ''}>Botiquín <span className="badge-pill">Nuevo</span></NavLink>
           <NavLink to="/preparate" className={({ isActive }) => isActive ? 'on' : ''}>Prepárate</NavLink>
+          <NavLink to="/educate" className="tu-clase-de-enlace">Educate</NavLink>
         </div>
 
         <div className="gnav-cta" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
