@@ -3920,3 +3920,111 @@ h3 {
     padding: 16px;
   }
 }
+
+/* --- ESTILOS PARA LA PÁGINA EDUCATE --- */
+.educate-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.educate-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.educate-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.educate-header p {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.guias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.guia-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.guia-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.guia-image-wrapper {
+  width: 100%;
+  height: 250px; /* Ajusta según el tamaño de tus portadas */
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.guia-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.guia-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.guia-content h2 {
+  font-size: 1.4rem;
+  color: #222;
+  margin-bottom: 5px;
+}
+
+.guia-content h3 {
+  font-size: 0.9rem;
+  color: #1991e6; /* Un tono para resaltar el subtítulo */
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.guia-content p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  flex-grow: 1; /* Empuja el botón hacia abajo si el texto es corto */
+}
+
+.btn-hotmart {
+  display: block;
+  text-align: center;
+  background-color: #1a93f7; /* Color representativo de Hotmart */
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.btn-hotmart:hover {
+  background-color: #2b71db;
+}
