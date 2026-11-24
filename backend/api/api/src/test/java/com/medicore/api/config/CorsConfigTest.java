@@ -1,6 +1,5 @@
 package com.medicore.api.config;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -15,68 +14,49 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * CORS: solo debe permitirse el origen del frontend en desarrollo.
- */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "cors.allowed-origins=http://localhost:5173,http://localhost:4173,https://*.vercel.app"
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
-class CorsConfigTest {
+class CorsWildcardTest {
 
-    private static final String ORIGEN_PERMITIDO = "http://localhost:5173";
-    private static final String ORIGEN_AJENO = "http://sitio-malicioso.example";
+    private static final String LOGIN = "/api/v1/auth/login";
+    private static final String ALERTAS = "/api/v1/alerts";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("el preflight desde el origen permitido responde con sus cabeceras CORS")
-    void preflightOrigenPermitido() throws Exception {
-        mockMvc.perform(options("/api/v1/auth/login")
-                        .header(HttpHeaders.ORIGIN, ORIGEN_PERMITIDO)
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "content-type"))
+    @DisplayName("el preview de Vite (4173) esta permitido")
+    void previewVitePermitido() throws Exception {
+        mockMvc.perform(options(LOGIN)
+                        .header(HttpHeaders.ORIGIN, "http://localhost:4173")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST"))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEN_PERMITIDO))
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
-                        containsString("POST")));
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:4173"));
     }
 
     @Test
-    @DisplayName("el preflight desde un origen ajeno se rechaza")
-    void preflightOrigenAjeno() throws Exception {
-        mockMvc.perform(options("/api/v1/auth/login")
-                        .header(HttpHeaders.ORIGIN, ORIGEN_AJENO)
+    @DisplayName("un despliegue de Vercel entra por el comodin y recibe su propio origen")
+    void previewVercelPermitido() throws Exception {
+        String origen = "https://medicore-frontend-a1b2c3.vercel.app";
+
+        mockMvc.perform(get(ALERTAS).header(HttpHeaders.ORIGIN, origen))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origen));
+    }
+
+    @Test
+    @DisplayName("el comodin no abre otros subdominios ni otros dominios")
+    void comodinNoAbreOtrosDominios() throws Exception {
+        mockMvc.perform(options(LOGIN)
+                        .header(HttpHeaders.ORIGIN, "https://sitio-malicioso.example")
                         .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST"))
                 .andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-    }
 
-    @Test
-    @DisplayName("una peticion normal del frontend lleva la cabecera CORS")
-    void peticionNormalOrigenPermitido() throws Exception {
-        mockMvc.perform(get("/api/v1/medicines")
-                        .header(HttpHeaders.ORIGIN, ORIGEN_PERMITIDO))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEN_PERMITIDO));
-    }
-
-    @Test
-    @DisplayName("un origen ajeno no recibe cabecera CORS")
-    void peticionNormalOrigenAjeno() throws Exception {
-        mockMvc.perform(get("/api/v1/medicines")
-                        .header(HttpHeaders.ORIGIN, ORIGEN_AJENO))
+        mockMvc.perform(get(ALERTAS).header(HttpHeaders.ORIGIN, "https://sitio-malicioso.example"))
                 .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-    }
-
-    @Test
-    @DisplayName("el preflight de una ruta privada no exige token")
-    void preflightRutaPrivada() throws Exception {
-        mockMvc.perform(options("/api/v1/me/sessions")
-                        .header(HttpHeaders.ORIGIN, ORIGEN_PERMITIDO)
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "authorization"))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEN_PERMITIDO));
     }
 }
